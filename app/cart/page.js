@@ -1,6 +1,17 @@
 "use client";
+
 import { useState } from "react";
-import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, Tag, Clock, MapPin, CreditCard } from "lucide-react";
+import {
+  ShoppingCart,
+  Trash2,
+  Plus,
+  Minus,
+  ArrowLeft,
+  Tag,
+  Clock,
+  MapPin,
+  CreditCard,
+} from "lucide-react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import Image from "next/image";
@@ -184,7 +195,7 @@ export default function CartPage() {
                 {appliedPromo && (
                   <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center justify-between">
                     <span className="text-sm text-green-700 font-medium">
-                      ✓ Code "{appliedPromo.code}" applied!
+                      ✓ Code &quot;{appliedPromo.code}&quot; applied!
                     </span>
                     <button
                       onClick={() => {
