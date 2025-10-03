@@ -29,7 +29,7 @@ export default function TopRatedDishes() {
       rating: 4.8,
       reviews: 216,
       timeToPrep: "25 min",
-      badge: "Chef&apos;s Choice",
+      badge: "Chef&apos;s Choice", // fixed
       quantity: 0,
     },
     {
@@ -61,7 +61,6 @@ export default function TopRatedDishes() {
     },
   ]);
 
-  // Add to cart
   const addToCart = (id) => {
     setTopDishes(
       topDishes.map((dish) =>
@@ -70,7 +69,6 @@ export default function TopRatedDishes() {
     );
   };
 
-  // Update quantity
   const updateQuantity = (id, change) => {
     setTopDishes(
       topDishes.map((dish) =>
@@ -81,7 +79,6 @@ export default function TopRatedDishes() {
     );
   };
 
-  // Badge icon
   const getBadgeIcon = (badge) => {
     switch (badge) {
       case "Best Seller":
@@ -95,7 +92,6 @@ export default function TopRatedDishes() {
     }
   };
 
-  // Badge color
   const getBadgeColor = (badge) => {
     switch (badge) {
       case "Best Seller":
@@ -111,11 +107,9 @@ export default function TopRatedDishes() {
 
   return (
     <section className="py-16 px-4 sm:px-8 lg:px-12 bg-white relative">
-      {/* Background decoration */}
       <div className="absolute inset-y-0 right-0 w-1/3 bg-orange-50 -z-10"></div>
 
       <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
         <div className="mb-12 relative">
           <div className="flex items-center gap-2 mb-2">
             <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
@@ -133,14 +127,12 @@ export default function TopRatedDishes() {
           <div className="h-1 w-20 bg-orange-500 mt-6"></div>
         </div>
 
-        {/* Top Dishes */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
           {topDishes.map((dish) => (
             <div
               key={dish.id}
               className="flex flex-col sm:flex-row bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
-              {/* Image */}
               <div className="relative w-full sm:w-2/5 h-60 sm:h-auto">
                 <Image
                   src={dish.img}
@@ -150,20 +142,15 @@ export default function TopRatedDishes() {
                   className="object-cover"
                   priority={dish.id === 1}
                 />
-                {/* Badge */}
                 <div
-                  className={`absolute top-4 left-4 ${getBadgeColor(
-                    dish.badge
-                  )} text-white text-xs px-3 py-1 rounded-full flex items-center gap-1`}
+                  className={`absolute top-4 left-4 ${getBadgeColor(dish.badge)} text-white text-xs px-3 py-1 rounded-full flex items-center gap-1`}
                 >
                   {getBadgeIcon(dish.badge)}
                   <span>{dish.badge}</span>
                 </div>
               </div>
 
-              {/* Content */}
               <div className="w-full sm:w-3/5 p-5 sm:p-6 flex flex-col">
-                {/* Title + Rating */}
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-xl font-bold text-gray-800 hover:text-orange-600 transition-colors">
                     {dish.name}
@@ -179,23 +166,18 @@ export default function TopRatedDishes() {
                   </div>
                 </div>
 
-                {/* Description */}
                 <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">
                   {dish.description}
                 </p>
 
-                {/* Prep Time */}
                 <div className="flex items-center mb-4 text-gray-500">
                   <Clock className="w-4 h-4 mr-1" />
                   <span className="text-xs">{dish.timeToPrep}</span>
                 </div>
 
-                {/* Price + Actions */}
                 <div className="flex items-center justify-between mt-auto">
                   <div className="flex items-end">
-                    <span className="text-lg font-bold text-gray-900">
-                      {dish.price}
-                    </span>
+                    <span className="text-lg font-bold text-gray-900">{dish.price}</span>
                     {dish.originalPrice && (
                       <span className="text-sm text-gray-500 line-through ml-2">
                         {dish.originalPrice}
@@ -212,9 +194,7 @@ export default function TopRatedDishes() {
                       >
                         −
                       </button>
-                      <span className="text-gray-800 font-medium">
-                        {dish.quantity}
-                      </span>
+                      <span className="text-gray-800 font-medium">{dish.quantity}</span>
                       <button
                         onClick={() => updateQuantity(dish.id, 1)}
                         className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
@@ -239,7 +219,6 @@ export default function TopRatedDishes() {
           ))}
         </div>
 
-        {/* View All Button */}
         <div className="flex justify-center mt-12">
           <button className="group flex items-center gap-2 px-6 py-3 bg-white border border-orange-300 hover:border-orange-500 text-orange-600 hover:bg-orange-50 rounded-full font-medium transition-all shadow-sm">
             View All Top Rated Dishes
