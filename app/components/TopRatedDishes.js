@@ -5,61 +5,62 @@ import { Star, Award, TrendingUp, Clock, ShoppingBag, ChevronRight } from "lucid
 
 export default function TopRatedDishes() {
   const [topDishes, setTopDishes] = useState([
-    {
-      id: 1,
-      name: "Signature Wagyu Burger",
-      description:
-        "Premium Wagyu beef patty with truffle aioli, aged cheddar, caramelized onions on a brioche bun",
-      price: "$18.99",
-      originalPrice: "$22.99",
-      img: "/images/sandwich.jpg",
-      rating: 4.9,
-      reviews: 342,
-      timeToPrep: "20 min",
-      badge: "Best Seller",
-      quantity: 0,
-    },
-    {
-      id: 2,
-      name: "Truffle Mushroom Risotto",
-      description:
-        "Creamy Arborio rice with wild mushrooms, truffle oil, and shaved Parmesan",
-      price: "$16.50",
-      img: "/images/sandwich.jpg",
-      rating: 4.8,
-      reviews: 216,
-      timeToPrep: "25 min",
-      badge: "Chef's Choice",
-      quantity: 0,
-    },
-    {
-      id: 3,
-      name: "Mediterranean Salmon Bowl",
-      description:
-        "Grilled salmon with quinoa, cucumber, cherry tomatoes, feta, olives and lemon-dill dressing",
-      price: "$21.00",
-      originalPrice: "$24.00",
-      img: "/images/sandwich.jpg",
-      rating: 4.9,
-      reviews: 189,
-      timeToPrep: "18 min",
-      badge: "Healthy",
-      quantity: 0,
-    },
-    {
-      id: 4,
-      name: "Korean Fried Chicken",
-      description:
-        "Crispy double-fried chicken tossed in a sweet and spicy gochujang glaze with sesame seeds",
-      price: "$15.75",
-      img: "/images/sandwich.jpg",
-      rating: 4.7,
-      reviews: 275,
-      timeToPrep: "15 min",
-      badge: "Popular",
-      quantity: 0,
-    },
-  ]);
+  {
+    id: 1,
+    name: "Signature Wagyu Burger",
+    description:
+      "Premium Wagyu beef patty with truffle aioli, aged cheddar, caramelized onions on a brioche bun",
+    price: "$18.99",
+    originalPrice: "$22.99",
+    img: "/images/sandwich.jpg",
+    rating: 4.9,
+    reviews: 342,
+    timeToPrep: "20 min",
+    badge: "Best Seller",
+    quantity: 0,
+  },
+  {
+    id: 2,
+    name: "Truffle Mushroom Risotto",
+    description:
+      "Creamy Arborio rice with wild mushrooms, truffle oil, and shaved Parmesan",
+    price: "$16.50",
+    img: "/images/sandwich.jpg",
+    rating: 4.8,
+    reviews: 216,
+    timeToPrep: "25 min",
+    badge: "Chef&apos;s Choice", // <-- fixed
+    quantity: 0,
+  },
+  {
+    id: 3,
+    name: "Mediterranean Salmon Bowl",
+    description:
+      "Grilled salmon with quinoa, cucumber, cherry tomatoes, feta, olives and lemon-dill dressing",
+    price: "$21.00",
+    originalPrice: "$24.00",
+    img: "/images/sandwich.jpg",
+    rating: 4.9,
+    reviews: 189,
+    timeToPrep: "18 min",
+    badge: "Healthy",
+    quantity: 0,
+  },
+  {
+    id: 4,
+    name: "Korean Fried Chicken",
+    description:
+      "Crispy double-fried chicken tossed in a sweet and spicy gochujang glaze with sesame seeds",
+    price: "$15.75",
+    img: "/images/sandwich.jpg",
+    rating: 4.7,
+    reviews: 275,
+    timeToPrep: "15 min",
+    badge: "Popular",
+    quantity: 0,
+  },
+]);
+
 
   // Add to cart
   const addToCart = (id) => {
