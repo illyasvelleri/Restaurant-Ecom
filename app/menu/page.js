@@ -230,7 +230,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { ShoppingCart, Heart, Star, Search, Filter, X } from "lucide-react";
 import Header from "../components/navbar"; // adjust path if needed
-
+import Footer from "../components/footer";
 export default function MenuPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -369,6 +369,8 @@ export default function MenuPage() {
           </div>
         )}
       </div>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
