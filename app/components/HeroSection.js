@@ -238,7 +238,7 @@ export default function HeroSection() {
           <div className="relative flex justify-center lg:justify-end">
             <div className="relative w-full max-w-md lg:max-w-lg aspect-square">
               <Image
-                src="/images/hero-image-01.png"
+                src="/Images/hero-image-01.png"
                 alt="Delicious food delivery"
                 fill
                 className="object-cover rounded-full shadow-2xl border-8 border-white"
@@ -247,21 +247,21 @@ export default function HeroSection() {
 
               {/* Floating Food Images */}
               <Image
-                src="/images/pizza.png"
+                src="/Images/pizza.png"
                 alt="Pizza"
                 width={96}
                 height={96}
                 className="absolute top-6 -left-6 object-cover rounded-2xl shadow-xl hover:-translate-y-1 transition-transform"
               />
               <Image
-                src="/images/salad.png"
+                src="/Images/salad.png"
                 alt="Salad"
                 width={96}
                 height={96}
                 className="absolute bottom-8 -left-8 object-cover rounded-2xl shadow-xl hover:-translate-y-1 transition-transform"
               />
               <Image
-                src="/images/burger.png"
+                src="/Images/burger.png"
                 alt="Burger"
                 width={96}
                 height={96}
