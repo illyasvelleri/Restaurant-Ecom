@@ -123,7 +123,7 @@ export default function Header({ cart = [] }) {
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-orange-500">
             <Image
-              src="/images/logo.png"
+              src="/Images/logo.png"
               alt="Indulge Logo"
               width={28}
               height={28}
