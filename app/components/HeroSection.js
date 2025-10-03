@@ -197,6 +197,7 @@
 
 "use client";
 import Navbar from "../components/navbar";
+import Image from "next/image";
 
 export default function HeroSection() {
   return (
@@ -236,27 +237,35 @@ export default function HeroSection() {
           {/* Right Column - Hero Image */}
           <div className="relative flex justify-center lg:justify-end">
             <div className="relative w-full max-w-md lg:max-w-lg aspect-square">
-              <img
+              <Image
                 src="/images/hero-image-01.png"
                 alt="Delicious food delivery"
-                className="w-full h-full object-cover rounded-full shadow-2xl border-8 border-white"
+                fill
+                className="object-cover rounded-full shadow-2xl border-8 border-white"
+                priority
               />
 
               {/* Floating Food Images */}
-              <img
+              <Image
                 src="/images/pizza.png"
                 alt="Pizza"
-                className="absolute top-6 -left-6 w-24 h-24 object-cover rounded-2xl shadow-xl hover:-translate-y-1 transition-transform"
+                width={96}
+                height={96}
+                className="absolute top-6 -left-6 object-cover rounded-2xl shadow-xl hover:-translate-y-1 transition-transform"
               />
-              <img
+              <Image
                 src="/images/salad.png"
                 alt="Salad"
-                className="absolute bottom-8 -left-8 w-24 h-24 object-cover rounded-2xl shadow-xl hover:-translate-y-1 transition-transform"
+                width={96}
+                height={96}
+                className="absolute bottom-8 -left-8 object-cover rounded-2xl shadow-xl hover:-translate-y-1 transition-transform"
               />
-              <img
+              <Image
                 src="/images/burger.png"
                 alt="Burger"
-                className="absolute top-1/3 -right-8 w-24 h-24 object-cover rounded-2xl shadow-xl hover:-translate-y-1 transition-transform"
+                width={96}
+                height={96}
+                className="absolute top-1/3 -right-8 object-cover rounded-2xl shadow-xl hover:-translate-y-1 transition-transform"
               />
             </div>
           </div>

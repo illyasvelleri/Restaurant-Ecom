@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -8,76 +9,70 @@ import { ArrowRight, Clock, Sparkles, ChevronLeft, ChevronRight } from "lucide-r
 export default function OfferCarousel() {
   const [activeSlide, setActiveSlide] = useState(0);
   const sliderRef = useRef(null);
-  
-  // Enhanced offer data with more engaging details
+
+  // Enhanced offer data
   const offers = [
-    { 
+    {
       id: 1,
-      img: "/Images/banner.jpg", 
-      title: "10.10 MEGA SALE", 
+      img: "/images/banner.jpg",
+      title: "10.10 MEGA SALE",
       subtitle: "Save up to 35% on premium dishes",
       color: "from-orange-500 to-red-500",
       badge: "Limited Time",
-      endTime: "2023-10-15",
+      endTime: "2025-10-15",
       buttonText: "Grab Offer",
-      description: "Enjoy exclusive discounts on our chef's special selection"
+      description: "Enjoy exclusive discounts on our chef's special selection",
     },
-    { 
+    {
       id: 2,
-      img: "/images/offer2.png", 
-      title: "FREE DELIVERY", 
+      img: "/images/offer2.png",
+      title: "FREE DELIVERY",
       subtitle: "No minimum order required",
       color: "from-blue-500 to-indigo-600",
       badge: "Weekend Special",
       promoCode: "FREEDEL",
       buttonText: "Use Code",
-      description: "Order your favorites and enjoy free delivery all weekend long"
+      description: "Order your favorites and enjoy free delivery all weekend long",
     },
-    { 
+    {
       id: 3,
-      img: "/images/offer3.png", 
-      title: "FAMILY FEAST", 
+      img: "/images/offer3.png",
+      title: "FAMILY FEAST",
       subtitle: "Perfect for 4-6 people",
       color: "from-green-500 to-emerald-600",
       badge: "Best Value",
       discount: "25%",
       buttonText: "Order Now",
-      description: "Complete meal with appetizers, mains, and desserts at a special price"
+      description: "Complete meal with appetizers, mains, and desserts at a special price",
     },
   ];
 
   // Custom next/prev methods
-  const next = () => {
-    sliderRef.current.slickNext();
-  };
-  
-  const previous = () => {
-    sliderRef.current.slickPrev();
-  };
+  const next = () => sliderRef.current.slickNext();
+  const previous = () => sliderRef.current.slickPrev();
 
-  // Calculate remaining time for limited offers
+  // Timer
   const [timeRemaining, setTimeRemaining] = useState({ days: 0, hours: 0, minutes: 0 });
-  
+  const endTime = offers[0].endTime;
+
   useEffect(() => {
     const updateRemainingTime = () => {
-      const endDate = new Date(offers[0].endTime);
+      const endDate = new Date(endTime);
       const now = new Date();
       const timeDiff = endDate - now;
-      
+
       if (timeDiff > 0) {
         const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-        
         setTimeRemaining({ days, hours, minutes });
       }
     };
-    
+
     updateRemainingTime();
     const timer = setInterval(updateRemainingTime, 60000);
-    
     return () => clearInterval(timer);
-  }, []);
+  }, [endTime]);
 
   const settings = {
     dots: false,
@@ -99,22 +94,25 @@ export default function OfferCarousel() {
         <Slider ref={sliderRef} {...settings} className="offer-carousel">
           {offers.map((offer, index) => (
             <div key={offer.id}>
-              <div className={`relative w-full h-[320px] md:h-[380px] overflow-hidden`}>
-                {/* Background Gradient + Image */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${offer.color} opacity-90 z-10`}></div>
-                <img
+              <div className="relative w-full h-[320px] md:h-[380px] overflow-hidden">
+                {/* Background Gradient */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${offer.color} opacity-90 z-10`} />
+
+                {/* Optimized Next.js Image */}
+                <Image
                   src={offer.img}
                   alt={offer.title}
-                  loading={index === 0 ? "eager" : "lazy"}
-                  className="w-full h-full object-cover opacity-30 scale-110"
+                  fill
+                  priority={index === 0}
+                  className="object-cover opacity-30 scale-110"
                 />
-                
+
                 {/* Pattern Overlay */}
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMwLTkuOTQtOC4wNi0xOC0xOC0xOFYyYzcuNzMyIDAgMTQgNi4yNjggMTQgMTRoMnptLTIgMGMwIDcuNzMyLTYuMjY4IDE0LTE0IDE0djJjOC45NCAwIDE2LTcuMDYgMTYtMTZoLTJ6IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9Ii4xIi8+PC9nPjwvc3ZnPg==')] opacity-50 z-20"></div>
-                
+
                 {/* Content */}
                 <div className="absolute inset-0 z-30 flex flex-col justify-between p-8 md:p-10">
-                  {/* Top Badge */}
+                  {/* Top Badge / Timer / Promo */}
                   <div className="flex justify-between items-start">
                     <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-white text-xs font-medium">
                       <div className="flex items-center gap-1">
@@ -122,8 +120,7 @@ export default function OfferCarousel() {
                         <span>{offer.badge}</span>
                       </div>
                     </div>
-                    
-                    {/* Timer for limited offer */}
+
                     {index === 0 && (
                       <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2 text-white">
                         <div className="flex items-center gap-1 text-xs">
@@ -137,8 +134,7 @@ export default function OfferCarousel() {
                         </div>
                       </div>
                     )}
-                    
-                    {/* Promo code display */}
+
                     {offer.promoCode && (
                       <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-2">
                         <div className="text-xs text-white mb-1">Use code:</div>
@@ -148,21 +144,17 @@ export default function OfferCarousel() {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Main Content */}
                   <div className="mt-auto">
-                    {/* Offer details */}
                     <h3 className="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">
                       {offer.title}
                     </h3>
                     <p className="text-xl md:text-2xl font-medium text-white/90 mb-2">
                       {offer.subtitle}
                     </p>
-                    <p className="text-white/80 mb-6 max-w-xs">
-                      {offer.description}
-                    </p>
-                    
-                    {/* CTA Button */}
+                    <p className="text-white/80 mb-6 max-w-xs">{offer.description}</p>
+
                     <button className="group inline-flex items-center gap-2 bg-white hover:bg-white/90 transition-all text-gray-800 font-medium px-6 py-3 rounded-full shadow-lg">
                       {offer.buttonText}
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -173,17 +165,17 @@ export default function OfferCarousel() {
             </div>
           ))}
         </Slider>
-        
+
         {/* Navigation Controls */}
         <div className="absolute bottom-4 right-4 z-40 flex gap-2">
-          <button 
+          <button
             onClick={previous}
             className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 flex items-center justify-center text-white transition-colors"
             aria-label="Previous slide"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <button 
+          <button
             onClick={next}
             className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 flex items-center justify-center text-white transition-colors"
             aria-label="Next slide"
@@ -191,7 +183,7 @@ export default function OfferCarousel() {
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
-        
+
         {/* Dots Indicator */}
         <div className="absolute bottom-4 left-4 z-40 flex gap-2">
           {offers.map((_, idx) => (
@@ -199,9 +191,7 @@ export default function OfferCarousel() {
               key={idx}
               onClick={() => sliderRef.current.slickGoTo(idx)}
               className={`w-2 h-2 rounded-full transition-all ${
-                activeSlide === idx 
-                  ? 'w-6 bg-white' 
-                  : 'bg-white/50'
+                activeSlide === idx ? "w-6 bg-white" : "bg-white/50"
               }`}
               aria-label={`Go to slide ${idx + 1}`}
             />
