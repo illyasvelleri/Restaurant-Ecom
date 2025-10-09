@@ -36,7 +36,7 @@
 //               <Search className="text-gray-400 group-hover:text-orange-500 transition-colors" size={18} />
 //               <span className="text-gray-400 text-sm">Search...</span>
 //             </button>
-            
+
 //             <button className="relative p-2 sm:p-2.5 rounded-full bg-white border border-gray-200 hover:bg-orange-50 hover:border-orange-300 transition-all group">
 //               <ShoppingCart className="text-gray-600 group-hover:text-orange-500 transition-colors" size={20} />
 //               <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">3</span>
@@ -80,7 +80,7 @@
 //             <div className="inline-block px-4 py-2 bg-orange-100 text-orange-600 rounded-full text-sm font-medium">
 //               🔥 #1 Food Delivery Service
 //             </div>
-            
+
 //             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 leading-tight">
 //               It's not just{" "}
 //               <span className="text-orange-500 relative inline-block">
@@ -141,7 +141,7 @@
 //             <div className="relative w-full max-w-md lg:max-w-lg aspect-square">
 //               {/* Background Decorative Circle */}
 //               <div className="absolute inset-0 bg-gradient-to-br from-orange-100 via-orange-50 to-transparent rounded-full transform scale-110 blur-3xl opacity-60"></div>
-              
+
 //               {/* Main Food Image Container */}
 //               <div className="relative w-full h-full flex items-center justify-center">
 //                 <div className="w-4/5 h-4/5 rounded-full bg-white shadow-2xl flex items-center justify-center overflow-hidden">
@@ -225,7 +225,7 @@ export default function HeroSection() {
               <span className="text-orange-500 relative inline-block">
                 Food
                 <svg className="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 200 12" fill="none">
-                  <path d="M2 10C40 4 160 4 198 10" stroke="#F97316" strokeWidth="4" strokeLinecap="round"/>
+                  <path d="M2 10C40 4 160 4 198 10" stroke="#F97316" strokeWidth="4" strokeLinecap="round" />
                 </svg>
               </span>
               ,<br />
@@ -233,7 +233,7 @@ export default function HeroSection() {
               <span className="text-orange-500 relative inline-block">
                 Delivery
                 <svg className="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 200 12" fill="none">
-                  <path d="M2 10C40 4 160 4 198 10" stroke="#F97316" strokeWidth="4" strokeLinecap="round"/>
+                  <path d="M2 10C40 4 160 4 198 10" stroke="#F97316" strokeWidth="4" strokeLinecap="round" />
                 </svg>
               </span>
             </h1>
@@ -278,13 +278,25 @@ export default function HeroSection() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
-              <button className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-full hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-base sm:text-lg">
+              {/* Order Now Button → WhatsApp */}
+              <a
+                href="https://wa.me/918606746083"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-full hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-base sm:text-lg text-center"
+              >
                 Order Now
-              </button>
-              <button className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 font-bold rounded-full border-2 border-gray-900 hover:bg-gray-900 hover:text-white transition-all text-base sm:text-lg">
+              </a>
+
+              {/* View Menu Button → Menu Page */}
+              <a
+                href="/menu"
+                className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 font-bold rounded-full border-2 border-gray-900 hover:bg-gray-900 hover:text-white transition-all text-base sm:text-lg text-center"
+              >
                 View Menu
-              </button>
+              </a>
             </div>
+
           </div>
 
           {/* Right Column - Hero Image */}
@@ -308,7 +320,7 @@ export default function HeroSection() {
       {/* Bottom Wave Decoration */}
       <div className="absolute bottom-0 left-0 right-0 h-20 sm:h-24 overflow-hidden">
         <svg className="absolute bottom-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 1440 120" fill="none">
-          <path d="M0,64 C320,96 640,96 960,64 C1280,32 1440,32 1440,64 L1440,120 L0,120 Z" fill="rgba(249, 115, 22, 0.05)"/>
+          <path d="M0,64 C320,96 640,96 960,64 C1280,32 1440,32 1440,64 L1440,120 L0,120 Z" fill="rgba(249, 115, 22, 0.05)" />
         </svg>
       </div>
     </section>
@@ -336,7 +348,7 @@ export default function HeroSection() {
 //             </span>
 
 //             <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 leading-tight">
-//               Fresh <span className="text-orange-500">Food</span>, 
+//               Fresh <span className="text-orange-500">Food</span>,
 //               Fast <span className="text-orange-500">Delivery</span>
 //             </h1>
 

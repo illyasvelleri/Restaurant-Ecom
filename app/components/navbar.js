@@ -422,6 +422,19 @@ export default function Navbar({ cart = [] }) {
         </div>
       </nav>
 
+      {/* Mobile Top Navbar (Logo Left-Aligned) */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white shadow-md border-b border-gray-100 z-50">
+        <div className="flex items-center px-5 py-3">
+          {/* Logo */}
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-lg">i</span>
+            </div>
+            <span className="text-xl font-bold text-gray-900">Indulge</span>
+          </div>
+        </div>
+      </div>
+
       {/* Mobile Bottom Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-50">
         <div className="grid grid-cols-4 h-20">
@@ -468,8 +481,9 @@ export default function Navbar({ cart = [] }) {
         </div>
       </div>
 
-      {/* Spacer for bottom nav */}
-      <div className="lg:hidden h-20"></div>
+      {/* Spacers for mobile header & footer */}
+      <div className="lg:hidden h-32"></div>
     </>
   );
 }
+
