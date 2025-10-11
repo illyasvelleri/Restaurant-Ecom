@@ -1,10 +1,11 @@
+// app/api/auth/[...nextauth]/route.js
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import User from "@/models/User";
 import connectDB from "@/lib/db";
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -15,15 +16,12 @@ const handler = NextAuth({
       async authorize(credentials) {
         await connectDB();
 
-        // Find user by username
         const user = await User.findOne({ username: credentials.username });
         if (!user) throw new Error("Invalid username or password");
 
-        // Check password
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) throw new Error("Invalid username or password");
 
-        // Return user info including role
         return {
           id: user._id.toString(),
           username: user.username,
@@ -32,11 +30,7 @@ const handler = NextAuth({
       },
     }),
   ],
-
-  session: {
-    strategy: "jwt",
-  },
-
+  session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -46,16 +40,13 @@ const handler = NextAuth({
       }
       return token;
     },
-
     async session({ session, token }) {
       session.user.id = token.id;
       session.user.username = token.username;
       session.user.role = token.role;
       return session;
     },
-
     async redirect({ url, baseUrl, token }) {
-      // Redirect based on role
       if (token?.role) {
         switch (token.role) {
           case "superadmin":
@@ -71,11 +62,12 @@ const handler = NextAuth({
       return baseUrl;
     },
   },
-
   pages: {
     signIn: "/login",
     error: "/login",
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
