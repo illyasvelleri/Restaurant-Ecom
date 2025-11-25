@@ -1,236 +1,174 @@
-"use client"
-import { useState } from 'react';
+// components/FeaturedProducts.tsx  ← FINAL & BEAUTIFUL (SAME AS MENU CARDS)
+
+"use client";
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Heart, ShoppingBag, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function FeaturedProducts() {
-  // State for products with quantity
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "Burger Deluxe",
-      description: "Angus beef, cheddar, caramelized onions, special sauce",
-      price: "$12.00",
-      img: "/Images/sandwich.jpg",
-      rating: 4.8,
-      reviews: 124,
-      quantity: 0,
-      featured: true,
-      category: "Main Course"
-    },
-    {
-      id: 2,
-      name: "Salmon Sushi",
-      description: "Fresh salmon, avocado, cucumber, premium rice",
-      price: "$25.00",
-      img: "/Images/sandwich.jpg",
-      rating: 4.9,
-      reviews: 87,
-      quantity: 0,
-      featured: true,
-      category: "Sushi"
-    },
-    {
-      id: 3,
-      name: "French Fries",
-      description: "Hand-cut potatoes, sea salt, house-made aioli",
-      price: "$5.99",
-      img: "/Images/sandwich.jpg",
-      rating: 4.5,
-      reviews: 210,
-      quantity: 0,
-      category: "Sides"
-    },
-    {
-      id: 4,
-      name: "Chicken Wrap",
-      description: "Grilled chicken, fresh veggies, tahini sauce, warm pita",
-      price: "$9.50",
-      img: "/Images/sandwich.jpg",
-      rating: 4.7,
-      reviews: 95,
-      quantity: 0,
-      category: "Wraps"
-    },
-  ]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState([]);
 
-  // Function to handle quantity changes
-  const updateQuantity = (id, change) => {
-    setProducts(products.map(product => {
-      if (product.id === id) {
-        const newQuantity = Math.max(0, product.quantity + change);
-        return { ...product, quantity: newQuantity };
+  useEffect(() => {
+    const fetchPopular = async () => {
+      try {
+        const res = await fetch('/api/user/popular');
+        if (res.ok) {
+          const data = await res.json();
+          const items = data.map(item => ({
+            ...item.product,
+            quantity: 0,
+            featured: true
+          }));
+          setProducts(items);
+        } else {
+          toast.error("Failed to load popular dishes");
+        }
+      } catch (err) {
+        toast.error("Network error");
+      } finally {
+        setLoading(false);
       }
-      return product;
-    }));
+    };
+    fetchPopular();
+  }, []);
+
+  const toggleFavorite = (id) => {
+    setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
   };
 
-  // Function to add to cart
-  const addToCart = (id) => {
-    setProducts(products.map(product => {
-      if (product.id === id) {
-        return { ...product, quantity: product.quantity + 1 };
-      }
-      return product;
-    }));
-    // Here you would also add the item to the cart state/context
+  const addToCart = (item) => {
+    // In real app: add to global cart
+    toast.success(`${item.name} added to cart!`);
   };
 
-  // For scrolling controls in mobile view
   const scrollContainer = (direction) => {
-    const container = document.getElementById('featured-products-container');
+    const container = document.getElementById('featured-scroll');
     if (container) {
-      const scrollAmount = direction === 'left' ? -320 : 320;
+      const scrollAmount = direction === 'left' ? -350 : 350;
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
 
+  if (loading) {
+    return (
+      <section className="py-16 bg-gradient-to-b from-white to-orange-50">
+        <div className="container mx-auto px-6 text-center">
+          <div className="text-3xl font-bold text-orange-600">Loading Popular Dishes...</div>
+        </div>
+      </section>
+    );
+  }
+
+  if (products.length === 0) return null;
+
   return (
-    <section className="py-16 px-4 sm:px-8 lg:px-12 bg-gradient-to-b from-white to-orange-50 relative">
-      {/* Background pattern */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-orange-100 opacity-30"></div>
-        <div className="absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-green-100 opacity-30"></div>
-      </div>
-      
-      <div className="max-w-7xl mx-auto relative z-10">
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-10">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-              Popular Dishes <span className="text-orange-500">for you</span>
-            </h2>
-            <p className="text-gray-600 max-w-2xl">
-              Discover our most loved meals, handcrafted with premium ingredients and culinary excellence
-            </p>
-          </div>
-          
-          {/* Category Pills - Hidden on mobile, shown on larger screens */}
-          <div className="hidden md:flex items-center space-x-3 mt-6 md:mt-0">
-            <button className="px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-medium shadow-sm">
-              All
-            </button>
-            {['Main Course', 'Sushi', 'Sides', 'Desserts'].map((category) => (
-              <button 
-                key={category}
-                className="px-4 py-2 bg-white hover:bg-orange-50 text-gray-700 rounded-full text-sm font-medium transition-all shadow-sm hover:shadow"
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+    <section className="py-16 bg-gradient-to-b from-white to-orange-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+            Popular Dishes <span className="text-orange-500">Right Now</span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            These are the dishes everyone is loving — fresh, hot, and ready for you!
+          </p>
         </div>
 
-        {/* Mobile Scroll Controls */}
-        <div className="md:hidden flex justify-end space-x-2 mb-4">
-          <button 
-            onClick={() => scrollContainer('left')}
-            className="p-2 bg-white rounded-full shadow-md text-gray-700"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="w-5 h-5" />
+        {/* Mobile Scroll Buttons */}
+        <div className="md:hidden flex justify-end mb-6 space-x-3">
+          <button onClick={() => scrollContainer('left')} className="p-3 bg-white rounded-full shadow-lg">
+            <ChevronLeft size={24} />
           </button>
-          <button 
-            onClick={() => scrollContainer('right')}
-            className="p-2 bg-white rounded-full shadow-md text-gray-700"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-5 h-5" />
+          <button onClick={() => scrollContainer('right')} className="p-3 bg-white rounded-full shadow-lg">
+            <ChevronRight size={24} />
           </button>
         </div>
 
-        {/* Products Grid/Scroll */}
+        {/* Cards Grid / Scroll */}
         <div 
-          id="featured-products-container"
-          className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scroll-smooth"
+          id="featured-scroll"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {products.map((item) => (
-            <div
-              key={item.id}
-              className="flex-shrink-0 w-72 md:w-full bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group"
+            <div 
+              key={item._id} 
+              className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group hover:-translate-y-1"
             >
-              {/* Image Container */}
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <Image
-                  src={item.img}
-                  alt={item.name}
-                  fill
-                  sizes="(max-width: 640px) 288px, (max-width: 1024px) 50vw, 25vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  priority={item.featured}
-                />
-                {/* Favorite Button */}
-                <button 
-                  className="absolute top-3 right-3 p-2 bg-white/70 backdrop-blur-sm rounded-full hover:bg-white transition-all"
-                  aria-label={`Add ${item.name} to favorites`}
-                >
-                  <Heart className="w-4 h-4 text-gray-600" />
-                </button>
-                {/* Category Badge */}
-                <div className="absolute bottom-3 left-3 px-3 py-1 bg-black/50 backdrop-blur-sm text-white text-xs rounded-full">
-                  {item.category}
+              {/* Image Section */}
+              <div className="relative h-48 bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center">
+                {item.image ? (
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={180}
+                    height={180}
+                    className="object-contain group-hover:scale-110 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="bg-gray-200 border-2 border-dashed rounded-xl w-32 h-32" />
+                )}
+
+                {/* Popular Badge */}
+                <div className="absolute top-4 left-4 px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full shadow-lg">
+                  Popular
                 </div>
+
+                {/* Favorite Heart */}
+                <button
+                  onClick={() => toggleFavorite(item._id)}
+                  className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:scale-110 transition-transform"
+                >
+                  <Heart
+                    size={18}
+                    className={favorites.includes(item._id) ? "fill-red-500 text-red-500" : "text-gray-400"}
+                  />
+                </button>
               </div>
 
               {/* Content */}
               <div className="p-5">
-                {/* Title and Rating */}
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-bold text-gray-800 group-hover:text-orange-500 transition-colors">{item.name}</h3>
-                  <div className="flex items-center">
-                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                    <span className="text-sm font-medium text-gray-700 ml-1">{item.rating}</span>
-                  </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">{item.name}</h3>
+                <p className="text-sm text-gray-500 mb-3 line-clamp-2">
+                  {item.description || "Customer favorite"}
+                </p>
+
+                {/* Rating */}
+                <div className="flex items-center space-x-1 mb-4">
+                  <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                  <span className="text-sm font-semibold text-gray-900">{item.rating || 4.8}</span>
+                  <span className="text-sm text-gray-400">({item.reviews || 200}+)</span>
                 </div>
-                
-                {/* Description */}
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{item.description}</p>
-                
-                {/* Price and Add to Cart Section */}
+
+                {/* Price + Add Button */}
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-orange-600">{item.price}</span>
-                  
-                  {item.quantity > 0 ? (
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => updateQuantity(item.id, -1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
-                        aria-label={`Decrease quantity for ${item.name}`}
-                      >
-                        -
-                      </button>
-                      <span className="text-gray-800 font-medium">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.id, 1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
-                        aria-label={`Increase quantity for ${item.name}`}
-                      >
-                        +
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => addToCart(item.id)}
-                      className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-sm font-medium transition-all shadow-sm"
-                      aria-label={`Add ${item.name} to cart`}
-                    >
-                      <ShoppingBag className="w-4 h-4" />
-                      <span>Add</span>
-                    </button>
-                  )}
+                  <div className="text-2xl font-bold text-gray-900">{item.price} SAR</div>
+                  <button
+                    onClick={() => addToCart(item)}
+                    className="px-4 py-2 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+                  >
+                    <ShoppingCart size={16} />
+                    Add
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
-        
+
         {/* View All Button */}
-        <div className="flex justify-center mt-10">
-          <button className="px-6 py-3 bg-white border border-orange-300 hover:border-orange-500 text-orange-600 rounded-full text-sm font-medium transition-all shadow-sm hover:shadow flex items-center gap-2">
+        <div className="text-center mt-12">
+          <a 
+            href="/user/popular"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold text-lg rounded-full hover:shadow-xl transition-all hover:scale-105"
+          >
             View All Popular Dishes
-            <ChevronRight className="w-4 h-4" />
-          </button>
+            <ChevronRight size={24} />
+          </a>
         </div>
       </div>
     </section>

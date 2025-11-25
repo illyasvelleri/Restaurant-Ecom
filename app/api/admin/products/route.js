@@ -1,0 +1,131 @@
+
+import { NextResponse } from 'next/server';
+import connectDB from '@/lib/db';
+import Product from '@/models/Product';
+import { uploadImage, deleteImage } from '@/lib/services/cloudinary';
+
+await connectDB();
+
+export async function GET() {
+  try {
+    const products = await Product.find({}).sort({ createdAt: -1 }).lean();
+    return NextResponse.json(products);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+  }
+}
+
+export async function POST(request) {
+  try {
+    const formData = await request.formData();
+    const imageFile = formData.get('image');
+
+    const imageUrl = imageFile && imageFile.size > 0
+      ? await uploadImage(imageFile)
+      : null;
+
+    const product = await Product.create({
+      name: formData.get('name') || 'Unnamed Product',
+      category: formData.get('category') || 'Uncategorized',
+      price: formData.get('price') || '0.00',
+      stock: parseInt(formData.get('stock') || '0'),
+      status: formData.get('status') || 'active',
+      description: formData.get('description') || '',
+      image: imageUrl,
+      popular: false,
+    });
+
+    return NextResponse.json({ message: 'Product created', product }, { status: 201 });
+  } catch (error) {
+    console.error('POST error:', error);
+    return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
+  }
+}
+
+export async function PUT(request) {
+  try {
+    const contentType = request.headers.get('content-type') || '';
+
+    let data = {};
+    let isFormData = false;
+
+    // Detect if it's FormData or JSON
+    if (contentType.includes('multipart/form-data') || contentType.includes('form-data')) {
+      const formData = await request.formData();
+      isFormData = true;
+      // Convert FormData to object
+      for (const [key, value] of formData.entries()) {
+        data[key] = value;
+      }
+    } else {
+      // JSON payload (for popular toggle, status, etc.)
+      data = await request.json();
+    }
+
+    const id = data.id || data.get?.('id');
+    if (!id || id.length < 12) {
+      return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    // Handle image upload only if FormData has new image
+    if (isFormData) {
+      const imageFile = data.image || data.get?.('image');
+      if (imageFile && imageFile instanceof File && imageFile.size > 0) {
+        const newImageUrl = await uploadImage(imageFile);
+        if (product.image) {
+          const publicId = product.image.split('/').pop().split('.')[0];
+          await deleteImage(`restaurant/products/${publicId}`).catch(() => {});
+        }
+        product.image = newImageUrl;
+      }
+    }
+
+    // Update fields
+    product.name = data.name ?? product.name;
+    product.category = data.category ?? product.category;
+    product.price = data.price ?? product.price;
+    product.stock = data.stock !== undefined ? parseInt(data.stock) : product.stock;
+    product.status = data.status ?? product.status;
+    product.description = data.description ?? product.description;
+    product.popular = data.popular !== undefined ? Boolean(data.popular) : product.popular;
+
+    await product.save();
+
+    return NextResponse.json({
+      message: 'Product updated successfully',
+      product
+    });
+
+  } catch (error) {
+    console.error('PUT error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to update product' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const { id } = await request.json();
+    if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+
+    const product = await Product.findById(id);
+    if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    if (product.image) {
+      const publicId = product.image.split('/').pop().split('.')[0];
+      await deleteImage(`restaurant/products/${publicId}`).catch(() => {});
+    }
+
+    await Product.findByIdAndDelete(id);
+    return NextResponse.json({ message: 'Deleted' });
+  } catch (error) {
+    return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
+  }
+}

@@ -160,9 +160,10 @@ export default function Navbar({ cart = [] }) {
 
   const navLinksDesktop = [
     { id: "home", label: "Home", href: "/" },
-    { id: "menu", label: "Menu", href: "/menu" },
-    { id: "popular", label: "Popular", href: "/popular" },
-    { id: "profile", label: "Profile", href: "/profile" },
+    { id: "menu", label: "Menu", href: "/user/menu" },
+    { id: "popular", label: "Popular", href: "/user/popular" },
+    { id: "combos", label: "Combos", href: "/user/combos" },
+    // { id: "profile", label: "Profile", href: "/profile" },
   ];
 
   const bottomNavItems = [

@@ -1,6 +1,8 @@
+// app/admin/settings/page.js
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Home, Lock, Bell, CreditCard, Truck, CheckCircle, Save } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
@@ -10,30 +12,33 @@ import SecuritySettings from '../components/SecuritySettings';
 import NotificationSettings from '../components/NotificationSettings';
 import PaymentSettings from '../components/PaymentSettings';
 import DeliverySettings from '../components/DeliverySettings';
+import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activePage, setActivePage] = useState('settings');
   const [activeTab, setActiveTab] = useState('profile');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
   const user = { username: "Admin1", role: "admin" };
 
   const [profileData, setProfileData] = useState({
-    fullName: 'John Doe',
-    email: 'admin@restaurantpro.com',
-    phone: '+1 234-567-8901',
-    address: '123 Main Street, New York, NY 10001'
+    fullName: '',
+    email: '',
+    phone: '',
+    address: ''
   });
 
   const [restaurantData, setRestaurantData] = useState({
-    name: 'RestaurantPro',
-    description: 'Premium restaurant management system',
-    email: 'contact@restaurantpro.com',
-    phone: '+1 234-567-8900',
-    address: '456 Business Ave, New York, NY 10002',
-    website: 'www.restaurantpro.com',
-    timezone: 'America/New_York',
-    currency: 'USD'
+    name: '',
+    description: '',
+    email: '',
+    phone: '',
+    whatsapp: '',           // ← NEW: WhatsApp Number
+    address: '',
+    website: '',
+    timezone: 'Asia/Riyadh',
+    currency: 'SAR'         // ← Saudi Riyal
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -54,9 +59,49 @@ export default function SettingsPage() {
     estimatedTime: '30-45'
   });
 
-  const handleSave = () => {
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+  // Load from DB
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/admin/settings');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        if (data.profile) setProfileData(data.profile);
+        if (data.restaurant) setRestaurantData({ ...restaurantData, ...data.restaurant });
+        if (data.notifications) setNotificationSettings(data.notifications);
+        if (data.delivery) setDeliverySettings(data.delivery);
+      } catch (err) {
+        toast.error('Failed to load settings');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  // Save to DB
+  const handleSave = async () => {
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile: profileData,
+          restaurant: restaurantData,
+          notifications: notificationSettings,
+          delivery: deliverySettings,
+        }),
+      });
+
+      if (!res.ok) throw new Error();
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+      toast.success('Settings saved!');
+    } catch (err) {
+      toast.error('Failed to save');
+    }
   };
 
   const tabs = [
@@ -67,6 +112,14 @@ export default function SettingsPage() {
     { id: 'payment', label: 'Payment', icon: CreditCard },
     { id: 'delivery', label: 'Delivery', icon: Truck },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-lg text-gray-600">Loading settings...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
