@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@auth/core": "^0.41.1",
     "autoprefixer": "^10.4.21",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.8.0",
