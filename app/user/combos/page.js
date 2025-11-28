@@ -5,7 +5,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ShoppingCart, Heart, Star, Send, Plus, Minus, X, Package } from "lucide-react";
-import Header from "../../components/navbar";
 import Footer from "../../components/footer";
 import toast from 'react-hot-toast';
 
@@ -106,7 +105,6 @@ export default function ComboOffersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
-      <Header />
 
       {/* Hero Section */}
       <div className="container mx-auto px-6 py-16 text-center">

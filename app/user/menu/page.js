@@ -5,7 +5,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ShoppingCart, Heart, Star, Search, X, Send, Plus, Minus } from "lucide-react";
-import Header from "../../components/navbar";
 import Footer from "../../components/footer";
 import toast from 'react-hot-toast';
 
@@ -124,7 +123,6 @@ export default function MenuPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
-      <Header />
 
       {/* Search & Filter */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

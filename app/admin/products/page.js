@@ -1,3 +1,5 @@
+// app/admin/products/page.js
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -46,7 +48,9 @@ export default function ProductsPage() {
   const totalProducts = products.length;
   const activeProducts = products.filter(p => p.status === 'active').length;
   const lowStock = products.filter(p => p.stock < 10 && p.status === 'active').length;
-  const totalRevenue = products.reduce((sum, p) => sum + (p.sales || 0) * parseFloat(p.price || 0), 0).toFixed(2);
+  const totalRevenue = products
+    .reduce((sum, p) => sum + (p.sales || 0) * parseFloat(p.price || 0), 0)
+    .toFixed(2);
 
   const stats = [
     { title: 'Total Products', value: totalProducts, icon: Package, color: 'bg-gradient-to-br from-blue-400 to-blue-600', percentage: 8.2 },
@@ -59,26 +63,24 @@ export default function ProductsPage() {
     ? products
     : products.filter(p => p.category === filterCategory);
 
-  // FINAL FIXED handleSaveProduct — works 100% with FormData from modal
+  // Save product
   const handleSaveProduct = async (formData) => {
     setSaving(true);
     try {
       const method = selectedProduct ? 'PUT' : 'POST';
       const res = await fetch('/api/admin/products', {
         method,
-        body: formData, // Already contains: id, existingImage, image, name, etc.
+        body: formData,
       });
 
       const result = await res.json();
 
-      if (!res.ok) {
-        throw new Error(result.error || 'Failed to save product');
-      }
+      if (!res.ok) throw new Error(result.error || 'Failed to save product');
 
       toast.success(selectedProduct ? 'Product updated!' : 'Product added!');
       setShowModal(false);
       setSelectedProduct(null);
-      await fetchProducts(); // Refresh list
+      await fetchProducts();
     } catch (err) {
       console.error('Save error:', err);
       toast.error(err.message || 'Failed to save product');
@@ -88,7 +90,7 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (product) => {
-    if (!confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
+    if (!confirm(`Delete &quot;${product.name}&quot;? This cannot be undone.`)) return;
 
     try {
       const res = await fetch('/api/admin/products', {
@@ -108,7 +110,12 @@ export default function ProductsPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activePage={activePage} setActivePage={setActivePage} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        setIsOpen={setSidebarOpen}
+        activePage={activePage}
+        setActivePage={setActivePage}
+      />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header setIsOpen={setSidebarOpen} user={user} />
@@ -132,9 +139,13 @@ export default function ProductsPage() {
               <div className="p-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1">
-                    <button onClick={() => setFilterCategory('all')} className={`px-4 py-2 rounded-md text-sm font-medium transition ${filterCategory === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600'}`}>
+                    <button
+                      onClick={() => setFilterCategory('all')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition ${filterCategory === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600'}`}
+                    >
                       All
                     </button>
+
                     {['Pizza', 'Burgers', 'Salads', 'Pasta', 'Desserts', 'Beverages'].map(cat => (
                       <button
                         key={cat}
@@ -188,9 +199,10 @@ export default function ProductsPage() {
               </div>
             )}
 
+            {/* EMPTY STATE */}
             {filteredProducts.length === 0 && !loading && (
               <div className="text-center py-16 text-gray-500 text-lg">
-                No products found. Click "Add Product" to get started!
+                No products found. Click &quot;Add Product&quot; to get started!
               </div>
             )}
           </div>

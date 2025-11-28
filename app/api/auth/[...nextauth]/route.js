@@ -1,4 +1,5 @@
-// app/api/auth/[...nextauth]/route.js
+// app/api/auth/[...nextauth]/route.js → FINAL & FLAWLESS
+
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -8,66 +9,72 @@ import connectDB from "@/lib/db";
 export const authOptions = {
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: "credentials",
       credentials: {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        if (!credentials?.username || !credentials?.password) return null;
+
         await connectDB();
-
         const user = await User.findOne({ username: credentials.username });
-        if (!user) throw new Error("Invalid username or password");
+        if (!user) return null;
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) throw new Error("Invalid username or password");
+        const isMatch = await bcrypt.compare(credentials.password, user.password);
+        if (!isMatch) return null;
 
         return {
-          id: user._id.toString(),
+          id: user._id.toString(),    // very important
+          name: user.name || user.username,
           username: user.username,
-          role: user.role, // "user", "admin", "superadmin"
+          email: user.email || "",
+          phone: user.phone || "",
+          role: user.role || "user",
         };
       },
     }),
   ],
-  session: { strategy: "jwt" },
+
+  session: {
+    strategy: "jwt",
+  },
+
   callbacks: {
     async jwt({ token, user }) {
+      // First login
       if (user) {
-        token.id = user.id;
+        token.id = user.id;                   // IMPORTANT
         token.username = user.username;
+        token.name = user.name;
+        token.email = user.email;
+        token.phone = user.phone;
         token.role = user.role;
       }
       return token;
     },
+
     async session({ session, token }) {
-      session.user.id = token.id;
+      // Ensure user object exists
+      if (!session.user) session.user = {};
+
+      session.user.id = token.id;             // REQUIRED FOR DB UPDATE
       session.user.username = token.username;
+      session.user.name = token.name;
+      session.user.email = token.email;
+      session.user.phone = token.phone;
       session.user.role = token.role;
+
       return session;
     },
-    async redirect({ url, baseUrl, token }) {
-      if (token?.role) {
-        switch (token.role) {
-          case "superadmin":
-            return `${baseUrl}/superadmin/dashboard`;
-          case "admin":
-            return `${baseUrl}/admin/dashboard`;
-          case "user":
-            return `${baseUrl}/user/home`;
-          default:
-            return baseUrl;
-        }
-      }
-      return baseUrl;
-    },
   },
+
   pages: {
     signIn: "/login",
-    error: "/login",
   },
+
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };

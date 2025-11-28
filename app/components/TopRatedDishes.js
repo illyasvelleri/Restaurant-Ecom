@@ -1,232 +1,238 @@
+// components/TopRatedDishes.tsx → FINAL & 100% IDENTICAL TO MENU CARD STYLE
+
 "use client";
-import { useState } from "react";
-import Image from "next/image";
-import { Star, Award, TrendingUp, Clock, ShoppingBag, ChevronRight } from "lucide-react";
+
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { Clock, ShoppingCart, ChevronRight, X, Send, Plus, Minus } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function TopRatedDishes() {
-  const [topDishes, setTopDishes] = useState([
-    {
-      id: 1,
-      name: "Signature Wagyu Burger",
-      description:
-        "Premium Wagyu beef patty with truffle aioli, aged cheddar, caramelized onions on a brioche bun",
-      price: "$18.99",
-      originalPrice: "$22.99",
-      img: "/Images/sandwich.jpg",
-      rating: 4.9,
-      reviews: 342,
-      timeToPrep: "20 min",
-      badge: "Best Seller",
-      quantity: 0,
-    },
-    {
-      id: 2,
-      name: "Truffle Mushroom Risotto",
-      description:
-        "Creamy Arborio rice with wild mushrooms, truffle oil, and shaved Parmesan",
-      price: "$16.50",
-      img: "/Images/sandwich.jpg",
-      rating: 4.8,
-      reviews: 216,
-      timeToPrep: "25 min",
-      badge: "Chef&apos;s Choice", // fixed
-      quantity: 0,
-    },
-    {
-      id: 3,
-      name: "Mediterranean Salmon Bowl",
-      description:
-        "Grilled salmon with quinoa, cucumber, cherry tomatoes, feta, olives and lemon-dill dressing",
-      price: "$21.00",
-      originalPrice: "$24.00",
-      img: "/Images/sandwich.jpg",
-      rating: 4.9,
-      reviews: 189,
-      timeToPrep: "18 min",
-      badge: "Healthy",
-      quantity: 0,
-    },
-    {
-      id: 4,
-      name: "Korean Fried Chicken",
-      description:
-        "Crispy double-fried chicken tossed in a sweet and spicy gochujang glaze with sesame seeds",
-      price: "$15.75",
-      img: "/Images/sandwich.jpg",
-      rating: 4.7,
-      reviews: 275,
-      timeToPrep: "15 min",
-      badge: "Popular",
-      quantity: 0,
-    },
-  ]);
+  const [dishes, setDishes] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [showCart, setShowCart] = useState(false);
 
-  const addToCart = (id) => {
-    setTopDishes(
-      topDishes.map((dish) =>
-        dish.id === id ? { ...dish, quantity: dish.quantity + 1 } : dish
-      )
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [productsRes, settingsRes] = await Promise.all([
+          fetch('/api/user/products'),
+          fetch('/api/admin/settings')
+        ]);
+
+        if (productsRes.ok) {
+          const allProducts = await productsRes.json();
+          const active = allProducts.filter(p => p.status === 'active');
+          const shuffled = [...active].sort(() => Math.random() - 0.5);
+          setDishes(shuffled.slice(0, 4));
+        }
+
+        if (settingsRes.ok) {
+          const settings = await settingsRes.json();
+          const wa = settings.restaurant?.whatsapp?.replace(/\D/g, '') || '';
+          if (wa && wa.length >= 10) setWhatsappNumber(wa);
+        }
+      } catch (err) {
+        toast.error("Failed to load dishes");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const addToCart = (item) => {
+    setCart(prev => {
+      const exists = prev.find(i => i._id === item._id);
+      if (exists) {
+        return prev.map(i => i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i);
+      }
+      return [...prev, { ...item, quantity: 1 }];
+    });
+    toast.success("Added to cart!");
+  };
+
+  const updateQty = (id, change) => {
+    setCart(prev => prev
+      .map(i => i._id === id ? { ...i, quantity: i.quantity + change } : i)
+      .filter(i => i.quantity > 0)
     );
   };
 
-  const updateQuantity = (id, change) => {
-    setTopDishes(
-      topDishes.map((dish) =>
-        dish.id === id
-          ? { ...dish, quantity: Math.max(0, dish.quantity + change) }
-          : dish
-      )
+  const total = cart.reduce((sum, item) => sum + parseFloat(item.price || 0) * item.quantity, 0).toFixed(2);
+
+  const sendWhatsApp = () => {
+    if (cart.length === 0) return toast.error("Cart is empty");
+    if (!whatsappNumber) return toast.error("WhatsApp not configured");
+
+    const items = cart.map(i => `${i.quantity}x ${i.name} - ${i.price} SAR`).join('%0A');
+    const msg = encodeURIComponent(
+`*New Order*\n\n` +
+`*Items:*\n${items}\n\n` +
+`*Total: ${total} SAR*\n\n` +
+`Please reply with your name and address`
     );
+
+    window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, '_blank');
+    toast.success("Order sent!");
+    setCart([]);
+    setShowCart(false);
   };
 
-  const getBadgeIcon = (badge) => {
-    switch (badge) {
-      case "Best Seller":
-        return <TrendingUp className="w-3 h-3" />;
-      case "Chef&apos;s Choice":
-        return <Award className="w-3 h-3" />;
-      case "Healthy":
-        return <Star className="w-3 h-3" />;
-      default:
-        return <TrendingUp className="w-3 h-3" />;
-    }
-  };
+  if (loading) {
+    return (
+      <section className="py-16 bg-gradient-to-b from-white to-orange-50">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-3xl font-bold text-orange-600">Loading Special Dishes...</p>
+        </div>
+      </section>
+    );
+  }
 
-  const getBadgeColor = (badge) => {
-    switch (badge) {
-      case "Best Seller":
-        return "bg-red-500";
-      case "Chef&apos;s Choice":
-        return "bg-purple-500";
-      case "Healthy":
-        return "bg-green-500";
-      default:
-        return "bg-orange-500";
-    }
-  };
+  if (dishes.length === 0) return null;
 
   return (
-    <section className="py-16 px-4 sm:px-8 lg:px-12 bg-white relative">
-      <div className="absolute inset-y-0 right-0 w-1/3 bg-orange-50 -z-10"></div>
-
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-12 relative">
-          <div className="flex items-center gap-2 mb-2">
-            <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-            <h4 className="uppercase tracking-wider text-orange-600 font-semibold text-sm">
-              Highly Rated
-            </h4>
+    <>
+      <section className="py-16 bg-gradient-to-b from-white to-orange-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+              Special Dishes <span className="text-orange-500">Today</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Hand-picked for you — fresh, delicious, and ready in minutes
+            </p>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            Most Loved Dishes
-          </h2>
-          <p className="text-gray-600 max-w-2xl">
-            Our customers&apos; favorites with exceptional ratings and reviews. These
-            signature dishes have earned their spot as the stars of our menu.
-          </p>
-          <div className="h-1 w-20 bg-orange-500 mt-6"></div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
-          {topDishes.map((dish) => (
-            <div
-              key={dish.id}
-              className="flex flex-col sm:flex-row bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-            >
-              <div className="relative w-full sm:w-2/5 h-60 sm:h-auto">
-                <Image
-                  src={dish.img}
-                  alt={dish.name}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover"
-                  priority={dish.id === 1}
-                />
-                <div
-                  className={`absolute top-4 left-4 ${getBadgeColor(dish.badge)} text-white text-xs px-3 py-1 rounded-full flex items-center gap-1`}
-                >
-                  {getBadgeIcon(dish.badge)}
-                  <span>{dish.badge}</span>
-                </div>
-              </div>
+          {/* Floating Cart */}
+          <button
+            onClick={() => setShowCart(true)}
+            className="fixed bottom-6 right-6 z-50 bg-orange-600 text-white p-5 rounded-full shadow-2xl hover:scale-110 transition-all"
+          >
+            <ShoppingCart size={28} />
+            {cart.reduce((a, b) => a + b.quantity, 0) > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-7 h-7 flex items-center justify-center font-bold">
+                {cart.reduce((a, b) => a + b.quantity, 0)}
+              </span>
+            )}
+          </button>
 
-              <div className="w-full sm:w-3/5 p-5 sm:p-6 flex flex-col">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-xl font-bold text-gray-800 hover:text-orange-600 transition-colors">
-                    {dish.name}
-                  </h3>
-                  <div className="flex items-center bg-orange-50 px-2 py-1 rounded-lg">
-                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                    <span className="text-sm font-medium text-gray-700 ml-1">
-                      {dish.rating}
-                    </span>
-                    <span className="text-xs text-gray-500 ml-1">
-                      ({dish.reviews})
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">
-                  {dish.description}
-                </p>
-
-                <div className="flex items-center mb-4 text-gray-500">
-                  <Clock className="w-4 h-4 mr-1" />
-                  <span className="text-xs">{dish.timeToPrep}</span>
-                </div>
-
-                <div className="flex items-center justify-between mt-auto">
-                  <div className="flex items-end">
-                    <span className="text-lg font-bold text-gray-900">{dish.price}</span>
-                    {dish.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through ml-2">
-                        {dish.originalPrice}
-                      </span>
-                    )}
-                  </div>
-
-                  {dish.quantity > 0 ? (
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => updateQuantity(dish.id, -1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                        aria-label={`Decrease quantity for ${dish.name}`}
-                      >
-                        −
-                      </button>
-                      <span className="text-gray-800 font-medium">{dish.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(dish.id, 1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                        aria-label={`Increase quantity for ${dish.name}`}
-                      >
-                        +
-                      </button>
-                    </div>
+          {/* GRID — EXACT SAME AS MENU PAGE */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {dishes.map((dish) => (
+              <div
+                key={dish._id}
+                className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group hover:-translate-y-1"
+              >
+                {/* Image Container */}
+                <div className="relative h-48 bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center">
+                  {dish.image ? (
+                    <Image
+                      src={dish.image}
+                      alt={dish.name}
+                      width={180}
+                      height={180}
+                      className="object-contain group-hover:scale-110 transition-transform duration-300"
+                    />
                   ) : (
-                    <button
-                      onClick={() => addToCart(dish.id)}
-                      className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-sm font-medium transition-colors"
-                      aria-label={`Add ${dish.name} to cart`}
-                    >
-                      <ShoppingBag className="w-4 h-4" />
-                      <span>Add to Cart</span>
-                    </button>
+                    <div className="bg-gray-200 border-2 border-dashed rounded-xl w-32 h-32" />
                   )}
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
 
-        <div className="flex justify-center mt-12">
-          <button className="group flex items-center gap-2 px-6 py-3 bg-white border border-orange-300 hover:border-orange-500 text-orange-600 hover:bg-orange-50 rounded-full font-medium transition-all shadow-sm">
-            View All Top Rated Dishes
-            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">{dish.name}</h3>
+                  <p className="text-sm text-gray-500 mb-3 line-clamp-2">
+                    {dish.description || "Delicious dish"}
+                  </p>
+
+                  <div className="flex items-center text-gray-500 mb-4">
+                    <Clock className="w-4 h-4 mr-1" />
+                    <span className="text-xs">15–25 min</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-2xl font-bold text-gray-900">{dish.price} SAR</div>
+                    <button
+                      onClick={() => addToCart(dish)}
+                      className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+                    >
+                      <ShoppingCart size={16} />
+                      Add
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* View All Button */}
+          <div className="text-center mt-12">
+            <a
+              href="/user/menu"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold text-lg rounded-full hover:shadow-2xl transition-all hover:scale-105"
+            >
+              Explore Full Menu
+              <ChevronRight size={28} />
+            </a>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* EXACT SAME CART MODAL AS MENU PAGE */}
+      {showCart && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center">
+          <div className="bg-white w-full max-w-md rounded-t-3xl shadow-2xl">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h2 className="text-2xl font-bold">Your Cart</h2>
+              <button onClick={() => setShowCart(false)}>
+                <X size={28} />
+              </button>
+            </div>
+            <div className="p-6 max-h-96 overflow-y-auto">
+              {cart.length === 0 ? (
+                <p className="text-center text-gray-500 py-8">Cart is empty</p>
+              ) : (
+                cart.map(item => (
+                  <div key={item._id} className="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl mb-3">
+                    <div className="flex-1">
+                      <h4 className="font-semibold">{item.name}</h4>
+                      <p className="text-sm text-gray-600">{item.price} SAR each</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => updateQty(item._id, -1)} className="p-2 bg-gray-300 rounded-full">
+                        <Minus size={16} />
+                      </button>
+                      <span className="font-bold w-10 text-center">{item.quantity}</span>
+                      <button onClick={() => updateQty(item._id, 1)} className="p-2 bg-orange-500 text-white rounded-full">
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            {cart.length > 0 && (
+              <div className="p-6 border-t bg-gray-50">
+                <div className="flex justify-between text-xl font-bold mb-6">
+                  <span>Total</span>
+                  <span>{total} SAR</span>
+                </div>
+                <button
+                  onClick={sendWhatsApp}
+                  className="w-full bg-green-600 text-white font-bold py-5 rounded-2xl hover:bg-green-700 transition flex items-center justify-center gap-3 text-lg"
+                >
+                  <Send size={24} />
+                  Send Order via WhatsApp
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
-

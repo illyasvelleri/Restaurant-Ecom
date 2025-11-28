@@ -1,13 +1,12 @@
 "use client";
+
 import { useState } from "react";
+import Image from 'next/image'; // ← Added
 import { Search, ShoppingCart, Star, TrendingUp, Clock, Users } from "lucide-react";
-import Navbar from "../components/navbar"; // Imported Navbar component
 
 export default function HeroSection() {
   return (
     <section className="relative w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50 overflow-hidden">
-      {/* Navbar */}
-      <Navbar />
 
       {/* Hero Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
@@ -79,7 +78,6 @@ export default function HeroSection() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
-              {/* Order Now Button → WhatsApp */}
               <a
                 href="https://wa.me/918606746083"
                 target="_blank"
@@ -89,7 +87,6 @@ export default function HeroSection() {
                 Order Now
               </a>
 
-              {/* View Menu Button → Menu Page */}
               <a
                 href="/menu"
                 className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 font-bold rounded-full border-2 border-gray-900 hover:bg-gray-900 hover:text-white transition-all text-base sm:text-lg text-center"
@@ -97,19 +94,21 @@ export default function HeroSection() {
                 View Menu
               </a>
             </div>
-
           </div>
 
-          {/* Right Column - Hero Image */}
+          {/* Right Column - Hero Image — FIXED */}
           <div className="relative order-1 lg:order-2 flex justify-center lg:justify-end">
             <div className="relative w-full max-w-md lg:max-w-lg aspect-square">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-200 via-orange-100 to-transparent rounded-full transform scale-110 blur-3xl opacity-40 animate-pulse"></div>
               <div className="relative w-full h-full flex items-center justify-center z-10">
                 <div className="relative w-4/5 h-4/5">
-                  <img
+                  <Image
                     src="/Images/hero-image-01.png"
                     alt="Delicious food delivery"
-                    className="w-full h-full object-cover rounded-full shadow-2xl border-8 border-white"
+                    fill
+                    sizes="(max-width: 768px) 80vw, (max-width: 1200px) 50vw, 40vw"
+                    className="object-cover rounded-full shadow-2xl border-8 border-white"
+                    priority // This is the hero image → LCP critical
                   />
                 </div>
               </div>
@@ -127,4 +126,3 @@ export default function HeroSection() {
     </section>
   );
 }
-

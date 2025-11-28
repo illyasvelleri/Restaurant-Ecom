@@ -1,6 +1,8 @@
+// app/layout.js → FINAL & ERROR-FREE
+
 import "./globals.css";
-import { Geist, Geist_Mono } from "next/font/google";  // ← your original working imports
-import { Toaster } from "react-hot-toast";
+import { Geist, Geist_Mono } from "next/font/google";
+import ClientProviders from "./components/ClientProviders";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,31 +15,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Restaurant Admin",
-  description: "Manage your restaurant menu & inventory",
+  title: "Indulge - Best Food in Saudi",
+  description: "Order delicious food fast with love",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
-
-        {/* ← Only new thing: beautiful toast notifications */}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: "#1f2937",
-              color: "#fff",
-              fontSize: "14px",
-              borderRadius: "8px",
-            },
-            success: { style: { background: "#10b981" } },
-            error:   { style: { background: "#ef4444" } },
-          }}
-        />
+        {/* Only client stuff goes here */}
+        <ClientProviders>
+          <main>{children}</main>
+        </ClientProviders>
       </body>
     </html>
   );

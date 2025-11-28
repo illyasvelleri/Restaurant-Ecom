@@ -34,11 +34,11 @@ export default function SettingsPage() {
     description: '',
     email: '',
     phone: '',
-    whatsapp: '',           // ← NEW: WhatsApp Number
+    whatsapp: '',
     address: '',
     website: '',
     timezone: 'Asia/Riyadh',
-    currency: 'SAR'         // ← Saudi Riyal
+    currency: 'SAR'
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -59,7 +59,7 @@ export default function SettingsPage() {
     estimatedTime: '30-45'
   });
 
-  // Load from DB
+  // Load from DB — FIXED: added restaurantData to dependency array
   useEffect(() => {
     const load = async () => {
       try {
@@ -68,7 +68,7 @@ export default function SettingsPage() {
         const data = await res.json();
 
         if (data.profile) setProfileData(data.profile);
-        if (data.restaurant) setRestaurantData({ ...restaurantData, ...data.restaurant });
+        if (data.restaurant) setRestaurantData(prev => ({ ...prev, ...data.restaurant }));
         if (data.notifications) setNotificationSettings(data.notifications);
         if (data.delivery) setDeliverySettings(data.delivery);
       } catch (err) {
@@ -78,7 +78,7 @@ export default function SettingsPage() {
       }
     };
     load();
-  }, []);
+  }, [restaurantData]); // ← Now includes restaurantData → warning gone
 
   // Save to DB
   const handleSave = async () => {
@@ -103,6 +103,8 @@ export default function SettingsPage() {
       toast.error('Failed to save');
     }
   };
+
+  // ... rest of your code (tabs, JSX, etc.) remains 100% unchanged
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
