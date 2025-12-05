@@ -4,7 +4,6 @@ import User from "@/models/User";
 import connectDB from "@/lib/db";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { sendResetEmail } from "../../../../lib/email";
 
 export async function POST(request) {
   try {
