@@ -3,7 +3,6 @@
 import User from "@/models/User";
 import connectDB from "@/lib/db";
 import crypto from "crypto";
-import { sendPasswordResetEmail } from "@/lib/email"; // Optional: create this
 
 export async function POST(req) {
   await connectDB();
