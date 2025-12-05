@@ -1,25 +1,34 @@
 // app/api/user/popular/route.js
-import connectDB from '@/lib/db';
-import PopularItem from '@/models/PopularItem';
+import { NextResponse } from "next/server";
+import connectDB from "@/lib/db";
+import PopularItem from "@/models/PopularItem";
 
-await connectDB();
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
+// ❗ FIX: remove top-level await (causes build crashes with Turbopack)
+// await connectDB();
 
 export async function GET() {
   try {
+    await connectDB(); // ❗ Move DB connect inside handler
+
     const populars = await PopularItem.find({})
       .sort({ order: 1 })
-      .populate('productId')
+      .populate("productId")
       .lean();
 
-    const items = populars.map(p => ({
+    const items = populars.map((p) => ({
       product: {
         ...p.productId,
-        _id: p.productId._id.toString()
-      }
+        _id: p.productId._id.toString(),
+      },
     }));
 
-    return Response.json(items);
+    return NextResponse.json(items);
   } catch (error) {
-    return Response.json({ error: 'Failed' }, { status: 500 });
+    console.error("POPULAR GET ERROR:", error);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }
