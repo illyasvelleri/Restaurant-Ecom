@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, UtensilsCrossed, Flame } from "lucide-react";
+import { Home, UtensilsCrossed, Flame, Package } from "lucide-react";
 import ProfileIcon from "../components/ProfileIcon";
 
 export default function Navbar() {
@@ -36,6 +36,7 @@ export default function Navbar() {
     { href: "/", label: "Home", icon: Home },
     { href: "/user/menu", label: "Menu", icon: UtensilsCrossed },
     { href: "/user/popular", label: "Popular", icon: Flame },
+    { href: "/user/combos", label: "Combos", icon: Package }, // NEW ITEM
   ];
 
   const isActive = (href) => pathname === href;
@@ -47,7 +48,6 @@ export default function Navbar() {
       {/* DESKTOP NAVBAR */}
       <nav className="hidden lg:block fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
         <div className="container mx-auto px-8 py-5 flex items-center justify-between">
-          
           {/* LOGO */}
           <Link href="/" className="flex items-center gap-4">
             {restaurant.logo ? (
@@ -121,9 +121,9 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* MOBILE BOTTOM NAV */}
+      {/* MOBILE BOTTOM NAV (FIXED, RESPONSIVE, PREMIUM) */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-2xl border-t border-white/10 shadow-[0_-4px_30px_rgba(0,0,0,0.5)]">
-        <div className="grid grid-cols-3 h-20">
+        <div className="flex justify-between h-20 px-2">
           {navLinks.map((item) => {
             const active = isActive(item.href);
             const Icon = item.icon;
@@ -132,7 +132,7 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 ${
+                className={`relative flex flex-col items-center justify-center flex-1 gap-1 ${
                   active ? "text-white" : "text-white/50"
                 } transition`}
               >
@@ -142,7 +142,7 @@ export default function Navbar() {
                 </span>
 
                 {active && (
-                  <span className="absolute top-2 w-1.5 h-1.5 bg-white rounded-full" />
+                  <span className="absolute top-1 w-1.5 h-1.5 bg-white rounded-full" />
                 )}
               </Link>
             );
@@ -150,7 +150,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* MOBILE SPACER (ONLY ONE) */}
+      {/* MOBILE SPACER */}
       <div className="lg:hidden h-20" />
     </>
   );
