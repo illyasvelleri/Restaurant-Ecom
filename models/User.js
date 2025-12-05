@@ -60,10 +60,9 @@ const UserSchema = new mongoose.Schema(
     neighborhood: { type: String, trim: true, default: "" },     // District (e.g. Al Olaya)
     city: {
       type: String,
-      type: String,
       trim: true,
-      default: "Riyadh",
-      enum: ["Riyadh", "Jeddah", "Dammam", "Makkah", "Madinah", "Khobar", "Taif"],
+      default: "",
+      maxlength: 100,
     },
     pincode: { type: String, trim: true, default: "" },          // Saudi postal code
 

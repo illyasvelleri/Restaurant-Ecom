@@ -5,6 +5,10 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Order from "../../../../models/Orders"; // You should have this model
 import connectDB from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 export async function GET() {
   await connectDB();
   const session = await getServerSession(authOptions);
