@@ -8,6 +8,7 @@ import Product from "@/models/Product";
 // Prevent Next.js from trying to prerender this API route
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 const MAX_POPULAR = 8;
 
