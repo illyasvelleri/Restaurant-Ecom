@@ -1,8 +1,6 @@
-// components/Navbar.js → FINAL & PERFECT (Using ProfileIcon)
-
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -11,17 +9,17 @@ import ProfileIcon from "../components/ProfileIcon";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [restaurant, setRestaurant] = useState({ name: "Indulge", logo: null });
+  const [restaurant, setRestaurant] = useState({ name: "Restaurant", logo: null });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch('/api/admin/settings');
+        const res = await fetch("/api/admin/settings");
         if (res.ok) {
           const data = await res.json();
           setRestaurant({
-            name: data.restaurant?.name || "Indulge",
+            name: data.restaurant?.name || "Restaurant",
             logo: data.restaurant?.logo || null,
           });
         }
@@ -42,107 +40,117 @@ export default function Navbar() {
 
   const isActive = (href) => pathname === href;
 
-  if (loading) {
-    return <div className="h-16 bg-white border-b border-gray-100" />;
-  }
+  if (loading) return <div className="h-20 bg-black/80" />;
 
   return (
     <>
-      {/* Desktop Navbar */}
-      <nav className="hidden lg:block sticky top-0 bg-white/95 backdrop-blur-md shadow-sm z-50 border-b border-gray-100">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Logo & Name */}
+      {/* DESKTOP NAVBAR */}
+      <nav className="hidden lg:block fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
+        <div className="container mx-auto px-8 py-5 flex items-center justify-between">
+          
+          {/* LOGO */}
+          <Link href="/" className="flex items-center gap-4">
+            {restaurant.logo ? (
+              <Image
+                src={restaurant.logo}
+                alt={restaurant.name}
+                width={48}
+                height={48}
+                className="rounded-2xl shadow-xl object-cover border border-white/20"
+              />
+            ) : (
+              <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20">
+                <span className="text-white text-xl font-bold">
+                  {restaurant.name.charAt(0)}
+                </span>
+              </div>
+            )}
+            <span className="text-2xl font-light text-white tracking-wide">
+              {restaurant.name}
+            </span>
+          </Link>
+
+          {/* NAV LINKS */}
+          <div className="flex items-center gap-12">
+            {navLinks.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative text-lg tracking-wide ${
+                    active ? "text-white" : "text-white/60 hover:text-white"
+                  } transition-all`}
+                >
+                  {link.label}
+                  {active && (
+                    <span className="absolute -bottom-1 left-0 h-[2px] w-full bg-white rounded-full" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          <ProfileIcon />
+        </div>
+      </nav>
+
+      {/* MOBILE TOP NAV */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/85 backdrop-blur-xl border-b border-white/10 shadow-xl">
+        <div className="flex items-center justify-between px-5 py-4">
           <Link href="/" className="flex items-center gap-3">
             {restaurant.logo ? (
               <Image
                 src={restaurant.logo}
                 alt={restaurant.name}
-                width={44}
-                height={44}
-                className="rounded-2xl shadow-md object-cover"
+                width={40}
+                height={40}
+                className="rounded-xl border border-white/20 shadow-lg"
               />
             ) : (
-              <div className="w-11 h-11 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">
+              <div className="w-10 h-10 bg-white/10 rounded-xl border border-white/20 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">
                   {restaurant.name.charAt(0)}
                 </span>
               </div>
             )}
-            <span className="text-2xl font-extrabold text-gray-900 tracking-tight">
-              {restaurant.name}
-            </span>
+            <span className="text-white font-medium text-xl">{restaurant.name}</span>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="flex items-center gap-10">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`font-semibold text-gray-700 hover:text-orange-600 transition-all relative ${
-                  isActive(link.href) ? "text-orange-600" : ""
-                }`}
-              >
-                {link.label}
-                {isActive(link.href) && (
-                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-orange-600 rounded-full" />
-                )}
-              </Link>
-            ))}
-          </div>
-
-          {/* PROFILE ICON — Compact & Perfect */}
-          <ProfileIcon />
-        </div>
-      </nav>
-
-      {/* Mobile Top Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md shadow-md z-50 border-b border-gray-100">
-        <div className="flex items-center justify-between px-5 py-4">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            {restaurant.logo ? (
-              <Image src={restaurant.logo} alt={restaurant.name} width={36} height={36} className="rounded-xl" />
-            ) : (
-              <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-lg">{restaurant.name.charAt(0)}</span>
-              </div>
-            )}
-            <span className="text-xl font-bold text-gray-900">{restaurant.name}</span>
-          </Link>
-
-          {/* PROFILE ICON on Mobile */}
           <ProfileIcon />
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-50">
-        <div className="grid grid-cols-4 h-20">
+      {/* MOBILE BOTTOM NAV */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-2xl border-t border-white/10 shadow-[0_-4px_30px_rgba(0,0,0,0.5)]">
+        <div className="grid grid-cols-3 h-20">
           {navLinks.map((item) => {
             const active = isActive(item.href);
             const Icon = item.icon;
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 transition-all ${
-                  active ? "text-orange-600" : "text-gray-500"
-                }`}
+                className={`flex flex-col items-center justify-center gap-1 ${
+                  active ? "text-white" : "text-white/50"
+                } transition`}
               >
-                <Icon size={24} className={active ? "drop-shadow-md" : ""} />
-                <span className={`text-xs font-medium ${active ? "font-bold" : ""}`}>
+                <Icon size={26} className={`${active ? "drop-shadow-lg" : ""}`} />
+                <span className={`text-[11px] tracking-wide ${active ? "font-semibold" : ""}`}>
                   {item.label}
                 </span>
-                {active && <div className="absolute top-3 w-1 h-1 bg-orange-600 rounded-full" />}
+
+                {active && (
+                  <span className="absolute top-2 w-1.5 h-1.5 bg-white rounded-full" />
+                )}
               </Link>
             );
           })}
         </div>
       </div>
 
-      {/* Mobile Spacers */}
-      <div className="lg:hidden h-20" />
+      {/* MOBILE SPACER (ONLY ONE) */}
       <div className="lg:hidden h-20" />
     </>
   );

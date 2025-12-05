@@ -1,115 +1,119 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { TrendingUp, Clock, Users, Star } from "lucide-react";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 export default function HeroSection() {
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/admin/settings");
+
+        if (res.ok) {
+          const settings = await res.json();
+          const wa = settings.restaurant?.whatsapp?.replace(/\D/g, "") || "";
+          if (wa && wa.length >= 10) setWhatsappNumber(wa);
+        }
+      } catch (err) {
+        // Silent fail (Hero should never break UI)
+      }
+    };
+
+    load();
+  }, []);
+
+  const whatsappLink =
+    whatsappNumber && whatsappNumber.length >= 10
+      ? `https://wa.me/${whatsappNumber}`
+      : "https://wa.me/966500000000"; // fallback
+
   return (
-    <section className="relative w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50 overflow-hidden">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+      {/* Background */}
+      <div className="absolute inset-0 -z-10">
+        <Image
+          src="/Images/hero-image-01.png"
+          alt="Culinary excellence"
+          fill
+          priority
+          className="object-cover brightness-[0.4] grayscale"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/30" />
+      </div>
 
-          {/* Left: Content */}
-          <div className="space-y-6 sm:space-y-8 order-2 lg:order-1 z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-100 to-orange-50 border border-orange-200 text-orange-600 rounded-full text-sm font-semibold shadow-sm">
-              <TrendingUp size={16} />
-              #1 Food Delivery Service
-            </div>
+      {/* Overlay Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5" />
+      </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-gray-900 leading-tight">
-              Fresh{" "}
-              <span className="text-orange-500 relative inline-block">
-                Food
-                <svg className="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 200 12" fill="none">
-                  <path d="M2 10C40 4 160 4 198 10" stroke="#F97316" strokeWidth="4" strokeLinecap="round" />
-                </svg>
-              </span>
-              ,<br />
-              Fast{" "}
-              <span className="text-orange-500 relative inline-block">
-                Delivery
-                <svg className="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 200 12" fill="none">
-                  <path d="M2 10C40 4 160 4 198 10" stroke="#F97316" strokeWidth="4" strokeLinecap="round" />
-                </svg>
-              </span>
-            </h1>
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 text-center">
+        {/* Badge */}
+        {/* <div className="inline-flex items-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white/80 text-sm font-medium mb-12 shadow-2xl">
+          <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+          Riyadh’s Most Exclusive Dining Experience
+        </div> */}
 
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-xl leading-relaxed">
-              Discover culinary excellence delivered to your doorstep. Experience fresh, flavorful meals from your favorite restaurants in minutes.
-            </p>
+        {/* Title */}
+        <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-light tracking-tight text-white mb-8 leading-none">
+          <span className="block">Exceptional</span>
+          <span className="block font-medium text-white/95">Cuisine</span>
+          <span className="block">Delivered</span>
+        </h1>
 
-            <div className="flex flex-wrap items-center gap-6 pt-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                  <Star className="text-orange-500 fill-current" size={24} />
-                </div>
-                <div>
-                  <p className="font-bold">4.9 Rating</p>
-                  <p className="text-xs text-gray-500">2.5K+ Reviews</p>
-                </div>
-              </div>
-              <div className="w-px h-12 bg-gray-200 hidden sm:block" />
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                  <Users className="text-orange-500" size={24} />
-                </div>
-                <div>
-                  <p className="font-bold">5000+ Users</p>
-                  <p className="text-xs text-gray-500">Active Daily</p>
-                </div>
-              </div>
-              <div className="w-px h-12 bg-gray-200 hidden sm:block" />
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                  <Clock className="text-orange-500" size={24} />
-                </div>
-                <div>
-                  <p className="font-bold">15-30 Min</p>
-                  <p className="text-xs text-gray-500">Delivery Time</p>
-                </div>
-              </div>
-            </div>
+        <p className="text-xl sm:text-2xl text-white/70 max-w-3xl mx-auto mb-16 leading-relaxed font-light tracking-wide">
+          Handcrafted dishes from Riyadh’s finest kitchens — prepared with precision,
+          delivered with elegance.
+        </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-8">
-              <a
-                href="https://wa.me/918606746083"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-full hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all text-center"
-              >
-                Order Now
-              </a>
-              <a
-                href="/menu"
-                className="px-8 py-4 bg-white text-gray-900 font-bold rounded-full border-2 border-gray-900 hover:bg-gray-900 hover:text-white transition-all text-center"
-              >
-                View Menu
-              </a>
-            </div>
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <Link
+            href="/user/menu"
+            className="group px-16 py-7 bg-white text-black rounded-full text-xl font-medium hover:bg-gray-100 transition-all duration-500 shadow-2xl flex items-center gap-4"
+          >
+            Explore the Menu
+            <ChevronRight
+              size={28}
+              className="group-hover:translate-x-2 transition-transform"
+            />
+          </Link>
+
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-16 py-7 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full text-xl font-medium hover:bg-white/20 transition-all duration-500"
+          >
+            Order via WhatsApp
+          </a>
+        </div>
+
+        {/* Trust Indicators */}
+        <div className="flex flex-wrap justify-center gap-12 mt-20 text-white/50 text-sm uppercase tracking-widest">
+          <div className="text-center">
+            <p className="text-3xl font-light text-white mb-2">500+</p>
+            <p>Curated Dishes</p>
           </div>
-
-          {/* Right: Hero Image */}
-          <div className="relative order-1 lg:order-2 flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-md lg:max-w-lg aspect-square">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-200/40 to-transparent rounded-full blur-3xl animate-pulse opacity-50" />
-              <Image
-                src="/Images/hero-image-01.png" // single hero image
-                alt="Hero Image"
-                fill
-                className="object-cover rounded-full shadow-2xl border-8 border-white"
-                priority
-              />
-            </div>
+          <div className="text-center">
+            <p className="text-3xl font-light text-white mb-2">4.9</p>
+            <p>Guest Rating</p>
           </div>
-
+          <div className="text-center">
+            <p className="text-3xl font-light text-white mb-2">24/7</p>
+            <p>Available</p>
+          </div>
         </div>
       </div>
 
-      {/* Wave */}
-      <div className="absolute bottom-0 left-0 right-0 h-20 sm:h-24 overflow-hidden">
-        <svg className="absolute bottom-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 1440 120" fill="none">
-          <path d="M0,64 C320,96 640,96 960,64 C1280,32 1440,32 1440,64 L1440,120 L0,120 Z" fill="rgba(249, 115, 22, 0.05)" />
-        </svg>
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+        <div className="w-8 h-14 border-2 border-white/30 rounded-full flex justify-center">
+          <div className="w-1 h-4 bg-white/60 rounded-full mt-3 animate-pulse" />
+        </div>
       </div>
     </section>
   );

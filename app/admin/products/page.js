@@ -146,7 +146,7 @@ export default function ProductsPage() {
                       All
                     </button>
 
-                    {['Pizza', 'Burgers', 'Salads', 'Pasta', 'Desserts', 'Beverages'].map(cat => (
+                    {['Food', 'Drink', 'Desserts',].map(cat => (
                       <button
                         key={cat}
                         onClick={() => setFilterCategory(cat)}
