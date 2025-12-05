@@ -1,9 +1,9 @@
 import HeroSection from './components/HeroSection';
-import OfferCarousel from './components/OfferCarousel';
 import CategoryFilters from './components/CategoryFilters';
 import FeaturedProducts from './components/Featured';
 import TopRatedDishes from './components/TopRatedDishes';
 import Footer from './components/footer';
+
 
 export default function Home() {
   return (

@@ -1,11 +1,3 @@
-// /** @type {import('next').NextConfig} */
-// const nextConfig = {};
-
-// export default nextConfig;
-
-
-// next.config.js
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -18,8 +10,18 @@ const nextConfig = {
       },
     ],
   },
-  // optional: if you use other image hosts (like localhost, etc.)
-  // you can add more here
+  webpack(config) {
+    // CSS loader for slick-carousel (already handled by Next, but we add file-loader for fonts)
+    config.module.rules.push({
+      test: /\.(eot|woff|woff2|ttf|svg)$/,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/fonts/[name][ext]',
+      },
+    });
+
+    return config;
+  },
 };
 
 export default nextConfig;

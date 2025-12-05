@@ -1,11 +1,12 @@
-// app/register/page.js
+// app/register/page.js → WhatsApp Version (Perfect & Production-Ready)
+
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { UserPlus, Loader2, ChevronLeft } from "lucide-react";
+import { UserPlus, Loader2, ChevronLeft, MessageCircle } from "lucide-react";
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
@@ -18,29 +19,44 @@ export default function RegisterPage() {
     const formData = new FormData(e.target);
     const data = {
       username: formData.get("username"),
-      email: formData.get("email"),
+      whatsapp: formData.get("whatsapp") || "", // optional
       password: formData.get("password"),
     };
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-
-    const result = await res.json();
-
-    if (res.ok) {
-      toast.success("Account created! Please login");
-      router.push("/login");
-    } else {
-      toast.error(result.error || "Registration failed");
+    // Optional: clean WhatsApp number (remove spaces, dashes, etc.)
+    if (data.whatsapp) {
+      data.whatsapp = data.whatsapp.replace(/\D/g, ""); // keep only digits
+      if (data.whatsapp.length < 9) {
+        toast.error("Please enter a valid WhatsApp number");
+        setLoading(false);
+        return;
+      }
     }
-    setLoading(false);
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        toast.success("Account created! Welcome to Indulge!");
+        router.push("/login");
+      } else {
+        toast.error(result.error || "Registration failed");
+      }
+    } catch (err) {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-orange-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-orange-50 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-green-600 mb-8">
           <ChevronLeft size={20} />
@@ -57,27 +73,42 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Username */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
               <input
                 name="username"
                 type="text"
                 required
+                minLength="3"
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                 placeholder="Choose a username"
               />
             </div>
 
+            {/* WhatsApp Number - Optional */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email (Optional)</label>
-              <input
-                name="email"
-                type="email"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                placeholder="your@email.com"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                WhatsApp Number <span className="text-gray-500 font-normal">(Optional)</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <MessageCircle className="w-5 h-5 text-green-600" />
+                </div>
+                <input
+                  name="whatsapp"
+                  type="tel"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                  placeholder="966 50 123 4567"
+                  pattern="[0-9\s\-+]*"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                We'll send order updates via WhatsApp
+              </p>
             </div>
 
+            {/* Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
               <input
@@ -90,10 +121,11 @@ export default function RegisterPage() {
               />
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 rounded-xl hover:shadow-xl transition-all transform hover:scale-105 disabled:opacity-70 flex items-center justify-center gap-3"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 rounded-xl hover:shadow-xl transition-all transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3"
             >
               {loading ? (
                 <>
@@ -101,7 +133,10 @@ export default function RegisterPage() {
                   Creating Account...
                 </>
               ) : (
-                "Create Account"
+                <>
+                  <UserPlus size={24} />
+                  Create Account
+                </>
               )}
             </button>
           </form>

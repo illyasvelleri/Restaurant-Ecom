@@ -1,5 +1,3 @@
-// app/layout.js → FINAL & ERROR-FREE
-
 import "./globals.css";
 import { Inter } from "next/font/google";
 import ClientProviders from "./components/ClientProviders";
