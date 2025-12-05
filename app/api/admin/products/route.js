@@ -3,6 +3,9 @@ import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 import { uploadImage, deleteImage } from '@/lib/services/cloudinary';
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // GET: fetch all products
 export async function GET() {
   try {
