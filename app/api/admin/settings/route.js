@@ -4,12 +4,18 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Setting from '@/models/Settings';
 
-// Connect DB once
-await connectDB();
+// ❌ REMOVE: await connectDB();  ← Causes Vercel build error
+// ❌ Do NOT run code at module level in Next.js server functions
 
+// ----------------------------
+// GET SETTINGS
+// ----------------------------
 export async function GET() {
   try {
+    await connectDB(); // ✅ Safe
+
     const settings = await Setting.findOne({}) || {};
+
     return NextResponse.json({
       profile: settings.profile || {},
       restaurant: settings.restaurant || {},
@@ -22,12 +28,17 @@ export async function GET() {
   }
 }
 
+// ----------------------------
+// UPDATE SETTINGS
+// ----------------------------
 export async function PUT(request) {
   try {
+    await connectDB(); // ✅ Safe
+
     const body = await request.json();
 
     const updated = await Setting.findOneAndUpdate(
-      {}, // find the only document (or create if not exists)
+      {}, // Only document
       {
         $set: {
           profile: body.profile,
@@ -37,8 +48,8 @@ export async function PUT(request) {
         }
       },
       { 
-        upsert: true,     // create if doesn't exist
-        new: true,        // return updated document
+        upsert: true,
+        new: true,
         setDefaultsOnInsert: true
       }
     );
