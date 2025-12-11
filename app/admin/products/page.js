@@ -4,15 +4,12 @@
 
 import { useState, useEffect } from 'react';
 import { Package, BarChart3, DollarSign, TrendingUp, Download, Plus, Loader2 } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
 import ProductStatsCard from '../components/ProductStatsCard';
 import ProductModal from '../components/ProductModal';
 import ProductCard from '../components/ProductCard';
 import toast from 'react-hot-toast';
 
 export default function ProductsPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activePage, setActivePage] = useState('products');
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -110,16 +107,7 @@ export default function ProductsPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar
-        isOpen={sidebarOpen}
-        setIsOpen={setSidebarOpen}
-        activePage={activePage}
-        setActivePage={setActivePage}
-      />
-
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header setIsOpen={setSidebarOpen} user={user} />
-
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">

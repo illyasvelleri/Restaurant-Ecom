@@ -3,6 +3,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Search, ShoppingCart, X, Plus, Minus } from "lucide-react";
@@ -10,6 +11,7 @@ import toast from "react-hot-toast";
 import Footer from "../../components/footer";
 
 export default function MenuPage() {
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState([]);
@@ -66,15 +68,42 @@ export default function MenuPage() {
   const addToCart = (item) => {
     setCart(prev => {
       const exists = prev.find(i => i._id === item._id);
-      if (exists) return prev.map(i => i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i);
-      return [...prev, { ...item, quantity: 1 }];
+      let newCart;
+
+      if (exists) {
+        newCart = prev.map(i =>
+          i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      } else {
+        newCart = [...prev, { ...item, quantity: 1 }];
+      }
+
+      // THIS LINE SAVES CART TO LOCAL STORAGE (so checkout page can read it)
+      localStorage.setItem("cart", JSON.stringify(newCart));
+
+      return newCart;
     });
-    toast.success("Added to order", { style: { borderRadius: "24px", background: "#111", color: "#fff" } });
+
+    toast.success("Added to order", {
+      style: { borderRadius: "24px", background: "#111", color: "#fff" }
+    });
   };
 
   const updateQty = (id, change) => {
-    setCart(prev => prev.map(i => i._id === id ? { ...i, quantity: i.quantity + change } : i).filter(i => i.quantity > 0));
+    setCart(prev => {
+      const updated = prev
+        .map(i =>
+          i._id === id ? { ...i, quantity: i.quantity + change } : i
+        )
+        .filter(i => i.quantity > 0);
+
+      // SAVE UPDATED CART TO STORAGE
+      localStorage.setItem("cart", JSON.stringify(updated));
+
+      return updated;
+    });
   };
+
 
   const total = cart.reduce((s, i) => s + parseFloat(i.price || 0) * i.quantity, 0).toFixed(0);
   const cartCount = cart.reduce((a, b) => a + b.quantity, 0);
@@ -252,11 +281,15 @@ export default function MenuPage() {
                   <span>Total</span>
                   <span>{total} SAR</span>
                 </div>
+
                 <button
-                  onClick={sendWhatsApp}
+                  onClick={() => {
+                    if (cart.length === 0) return toast.error("Cart is empty");
+                    router.push("/user/checkout"); // New page!
+                  }}
                   className="w-full py-7 bg-gray-900 text-white rounded-3xl font-bold text-xl lg:text-2xl hover:bg-gray-800 transition shadow-2xl"
                 >
-                  Checkout via WhatsApp
+                  Proceed to Delivery
                 </button>
               </div>
             </motion.div>

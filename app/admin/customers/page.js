@@ -2,14 +2,11 @@
 
 import { useState } from 'react';
 import { Users, Activity, UserPlus, DollarSign, Filter, Download, Eye } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
 import CustomerStatsCard from '../components/CustomerStatsCard';
 import CustomerModal from '../components/CustomerModal';
 import CustomerCard from '../components/CustomerCard';
 
 export default function CustomersPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activePage, setActivePage] = useState('customers');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [viewMode, setViewMode] = useState('table');
@@ -40,11 +37,7 @@ export default function CustomersPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activePage={activePage} setActivePage={setActivePage} />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header setIsOpen={setSidebarOpen} user={user} />
-        
+      <div className="flex-1 flex flex-col overflow-hidden">   
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">

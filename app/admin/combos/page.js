@@ -5,14 +5,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Loader2, X, Upload, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
 import toast from 'react-hot-toast';
 
 const MAX_COMBOS = 10;
 
 export default function ComboOffersPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [combos, setCombos] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,11 +58,7 @@ export default function ComboOffersPage() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activePage="combos" />
-      
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header setIsOpen={setSidebarOpen} user={{ username: "Admin" }} />
-
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto px-6 py-10 text-center">
             <h1 className="text-5xl font-extrabold text-gray-900 mb-3">Combo Offers</h1>

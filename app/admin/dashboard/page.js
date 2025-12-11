@@ -2,13 +2,10 @@
 
 import { useState } from 'react';
 import { DollarSign, ShoppingBag, Users, Package } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
 import StatsCard from '../components/StatsCard';
 import RecentOrders from '../components/RecentOrders';
 
 export default function AdminDashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const user = { username: "Admin1", role: "admin" };
 
   const stats = [
@@ -20,11 +17,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-      
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header setIsOpen={setSidebarOpen} user={user} />
-        
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">

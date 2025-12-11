@@ -4,8 +4,6 @@
 
 import { useState, useEffect } from 'react';
 import { User, Home, Lock, Bell, CreditCard, Truck, CheckCircle, Save } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
 import ProfileSettings from '../components/ProfileSettings';
 import RestaurantSettings from '../components/RestaurantSettings';
 import SecuritySettings from '../components/SecuritySettings';
@@ -15,7 +13,6 @@ import DeliverySettings from '../components/DeliverySettings';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activePage, setActivePage] = useState('settings');
   const [activeTab, setActiveTab] = useState('profile');
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -125,11 +122,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activePage={activePage} setActivePage={setActivePage} />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header setIsOpen={setSidebarOpen} user={user} />
-        
+      <div className="flex-1 flex flex-col overflow-hidden"> 
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-6xl mx-auto">
             <div className="mb-8">

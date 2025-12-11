@@ -5,14 +5,11 @@
 import { useState, useEffect } from 'react';
 import { Search, Star, Loader2, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
 import toast from 'react-hot-toast';
 
 const MAX_POPULAR = 8;
 
 export default function PopularProductsPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
   const [popularItems, setPopularItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,11 +83,7 @@ export default function PopularProductsPage() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activePage="popular" />
-      
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header setIsOpen={setSidebarOpen} user={{ username: "Admin" }} />
-
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto px-6 py-10 text-center">
             <h1 className="text-5xl font-extrabold text-gray-900 mb-3">Popular Products</h1>

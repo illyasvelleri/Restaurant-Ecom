@@ -1,25 +1,12 @@
 // models/Orders.js
-
 import mongoose from "mongoose";
 
 const OrderItemSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-  price: {
-    type: Number,
-    required: true,
-  },
-  note: {
-    type: String,
-    default: "",
-  },
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+  name: { type: String, required: true },
+  quantity: { type: Number, required: true, min: 1 },
+  price: { type: Number, required: true },
+  note: { type: String, default: "" },
 });
 
 const OrderSchema = new mongoose.Schema(
@@ -27,56 +14,51 @@ const OrderSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,      // WhatsApp orders may come without login
     },
+
     items: [OrderItemSchema],
-    total: {
-      type: Number,
-      required: true,
-    },
+
+    total: { type: Number, required: true },
+
     status: {
       type: String,
-      enum: ["pending", "confirmed", "preparing", "on-the-way", "delivered", "cancelled"],
+      enum: [
+        "pending",
+        "confirmed",
+        "preparing",
+        "on-the-way",
+        "delivered",
+        "cancelled"
+      ],
       default: "pending",
     },
+
     paymentMethod: {
       type: String,
       enum: ["cash", "card-online", "apple-pay", "stc-pay"],
       default: "cash",
     },
-    deliveryAddress: {
-      type: String,
-      required: true,
-    },
-    phone: {
-      type: String,
-      required: true,
-    },
-    customerName: {
-      type: String,
-      required: true,
-    },
-    whatsapp: {
-      type: String,
-      required: true,
-    },
-    notes: {
-      type: String,
-      default: "",
-    },
-    // For WhatsApp orders
+
+    deliveryAddress: { type: String, required: true },
+    phone: { type: String, required: true },
+    customerName: { type: String, required: true },
+    whatsapp: { type: String, required: false },
+    notes: { type: String, default: "" },
+
+    // source: {
+    //   type: String,
+    //   enum: ["Website", "WhatsApp", "Admin", "MobileApp"],
+    //   default: "Website"
+    // },
+
     whatsappMessageId: {
       type: String,
       unique: true,
-      sparse: true, // allows multiple nulls
+      sparse: true,
     },
   },
-  {
-    timestamps: true, // auto adds createdAt & updatedAt
-  }
+  { timestamps: true }
 );
 
-// Prevent model overwrite in development
-const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);
-
-export default Order;
+export default mongoose.models.Order || mongoose.model("Order", OrderSchema);

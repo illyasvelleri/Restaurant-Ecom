@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { DollarSign, ShoppingCart, Target, Percent, Download } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
 import MetricCard from '../components/MetricCard';
 import RevenueOverview from '../components/RevenueOverview';
 import SalesByCategory from '../components/SalesByCategory';
@@ -12,7 +10,6 @@ import TopProducts from '../components/TopProducts';
 import QuickStats from '../components/QuickStats';
 
 export default function AnalyticsPage() {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activePage, setActivePage] = useState('analytics');
     const [timeRange, setTimeRange] = useState('7days');
     const user = { username: "Admin1", role: "admin" };
@@ -70,10 +67,7 @@ export default function AnalyticsPage() {
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activePage={activePage} setActivePage={setActivePage} />
-
             <div className="flex-1 flex flex-col overflow-hidden">
-                <Header setIsOpen={setSidebarOpen} user={user} />
 
                 <main className="flex-1 overflow-y-auto p-6">
                     <div className="max-w-7xl mx-auto">

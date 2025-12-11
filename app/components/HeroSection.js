@@ -35,7 +35,7 @@ export default function HeroSection() {
         <div className="absolute bottom-20 -right-40 w-96 h-96 bg-orange-100/15 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative pt-32 lg:pt-40 pb-24">
+      <div className="relative pb-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
 
           {/* Refined, spacious headline */}

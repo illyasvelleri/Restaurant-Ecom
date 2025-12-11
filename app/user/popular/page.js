@@ -3,6 +3,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ShoppingCart, X, Plus, Minus } from "lucide-react";
 import { motion } from "framer-motion";
@@ -10,6 +11,7 @@ import toast from "react-hot-toast";
 import Footer from "../../components/footer";
 
 export default function PopularPage() {
+  const router = useRouter();
   const [cart, setCart] = useState([]);
   const [popularItems, setPopularItems] = useState([]);
   const [whatsappNumber, setWhatsappNumber] = useState("");
@@ -46,14 +48,41 @@ export default function PopularPage() {
   const addToCart = (item) => {
     setCart(prev => {
       const exists = prev.find(i => i._id === item._id);
-      if (exists) return prev.map(i => i._id === item._id ? {...i, quantity: i.quantity + 1} : i);
-      return [...prev, {...item, quantity: 1}];
+      let newCart;
+
+      if (exists) {
+        newCart = prev.map(i =>
+          i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      } else {
+        newCart = [...prev, { ...item, quantity: 1 }];
+      }
+
+      // THIS LINE SAVES CART TO LOCAL STORAGE (so checkout page can read it)
+      localStorage.setItem("cart", JSON.stringify(newCart));
+
+      return newCart;
     });
-    toast.success("Added to order", { style: { borderRadius: "24px", background: "#111", color: "#fff" } });
+
+    toast.success("Added to order", {
+      style: { borderRadius: "24px", background: "#111", color: "#fff" }
+    });
   };
 
+
   const updateQty = (id, change) => {
-    setCart(prev => prev.map(i => i._id === id ? {...i, quantity: i.quantity + change} : i).filter(i => i.quantity > 0));
+    setCart(prev => {
+      const updated = prev
+        .map(i =>
+          i._id === id ? { ...i, quantity: i.quantity + change } : i
+        )
+        .filter(i => i.quantity > 0);
+
+      // SAVE UPDATED CART TO STORAGE
+      localStorage.setItem("cart", JSON.stringify(updated));
+
+      return updated;
+    });
   };
 
   const total = cart.reduce((s, i) => s + parseFloat(i.price || 0) * i.quantity, 0).toFixed(0);
@@ -151,12 +180,12 @@ export default function PopularPage() {
                     className="flex gap-6 bg-gray-50/80 p-6 rounded-3xl shadow-md"
                   >
                     <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl overflow-hidden flex-shrink-0 shadow-md">
-                      <Image 
-                        src={item.image || "/placeholder.jpg"} 
-                        alt={item.name} 
-                        width={112} 
-                        height={112} 
-                        className="w-full h-full object-cover" 
+                      <Image
+                        src={item.image || "/placeholder.jpg"}
+                        alt={item.name}
+                        width={112}
+                        height={112}
+                        className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
@@ -185,10 +214,13 @@ export default function PopularPage() {
                   <span>{total} SAR</span>
                 </div>
                 <button
-                  onClick={sendWhatsApp}
+                  onClick={() => {
+                    if (cart.length === 0) return toast.error("Cart is empty");
+                    router.push("/user/checkout"); // New page!
+                  }}
                   className="w-full py-7 bg-gray-900 text-white rounded-3xl font-bold text-xl lg:text-2xl hover:bg-gray-800 transition shadow-2xl"
                 >
-                  Checkout via WhatsApp
+                  Proceed to Delivery
                 </button>
               </div>
             </motion.div>

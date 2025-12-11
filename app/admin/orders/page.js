@@ -1,14 +1,12 @@
+//admin/orders
 "use client";
 
 import { useState } from 'react';
 import { ShoppingBag, Clock, Truck, Check, XCircle, Eye, Calendar, Download } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
 import OrderStatsCard from '../components/OrderStatsCard';
 import OrderModal from '../components/OrderModal';
 
 export default function OrdersPage() {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activePage, setActivePage] = useState('orders');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [filterStatus, setFilterStatus] = useState('all');
@@ -56,10 +54,7 @@ export default function OrdersPage() {
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} activePage={activePage} setActivePage={setActivePage} />
-
             <div className="flex-1 flex flex-col overflow-hidden">
-                <Header setIsOpen={setSidebarOpen} user={user} />
 
                 <main className="flex-1 overflow-y-auto p-6">
                     <div className="max-w-7xl mx-auto">
