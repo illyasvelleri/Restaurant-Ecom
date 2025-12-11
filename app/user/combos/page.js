@@ -1,14 +1,16 @@
-'use client';
+// app/user/combos/page.js → FINAL 2025 LUXURY COMBOS PAGE
+
+"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { ShoppingCart, Heart, Star, Send, Plus, Minus, X, Package } from "lucide-react";
-import Footer from "../../components/footer";
+import { ShoppingCart, X, Plus, Minus } from "lucide-react";
+import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import Footer from "../../components/footer";
 
-export default function ComboOffersPage() {
+export default function CombosPage() {
   const [cart, setCart] = useState([]);
-  const [favorites, setFavorites] = useState([]);
   const [combos, setCombos] = useState([]);
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [loading, setLoading] = useState(true);
@@ -19,7 +21,7 @@ export default function ComboOffersPage() {
       try {
         const [comboRes, settingsRes] = await Promise.all([
           fetch("/api/admin/combos"),
-          fetch("/api/admin/settings"),
+          fetch("/api/admin/settings")
         ]);
 
         if (comboRes.ok) {
@@ -29,12 +31,11 @@ export default function ComboOffersPage() {
 
         if (settingsRes.ok) {
           const settings = await settingsRes.json();
-          const wa = settings.restaurant?.whatsapp?.replace(/\D/g, "");
+          const wa = settings.restaurant?.whatsapp?.replace(/\D/g, "") || "";
           if (wa && wa.length >= 10) setWhatsappNumber(wa);
-          else toast.error("WhatsApp number not set in Admin Settings");
         }
-      } catch {
-        toast.error("Failed to load combo offers");
+      } catch (err) {
+        toast.error("Failed to load combos");
       } finally {
         setLoading(false);
       }
@@ -42,240 +43,230 @@ export default function ComboOffersPage() {
     load();
   }, []);
 
-  const toggleFavorite = (id) => {
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
-    );
-  };
-
   const addToCart = (combo) => {
-    setCart((prev) => {
-      const exists = prev.find((i) => i._id === combo._id);
-      if (exists) {
-        return prev.map((i) =>
-          i._id === combo._id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      }
-      return [...prev, { ...combo, quantity: 1, name: combo.title, price: combo.price }];
+    setCart(prev => {
+      const exists = prev.find(i => i._id === combo._id);
+      if (exists) return prev.map(i => i._id === combo._id ? {...i, quantity: i.quantity + 1} : i);
+      return [...prev, {...combo, quantity: 1, name: combo.title, price: combo.price}];
     });
-    toast.success(`"${combo.title}" added to cart!`);
+    toast.success("Combo added to order", { style: { borderRadius: "24px", background: "#111", color: "#fff" } });
   };
 
   const updateQty = (id, change) => {
-    setCart((prev) =>
-      prev
-        .map((i) =>
-          i._id === id ? { ...i, quantity: i.quantity + change } : i
-        )
-        .filter((i) => i.quantity > 0)
-    );
+    setCart(prev => prev.map(i => i._id === id ? {...i, quantity: i.quantity + change} : i).filter(i => i.quantity > 0));
   };
 
-  const total = cart
-    .reduce((s, i) => s + parseFloat(i.price || 0) * i.quantity, 0)
-    .toFixed(2);
+  const total = cart.reduce((s, i) => s + parseFloat(i.price || 0) * i.quantity, 0).toFixed(0);
+  const cartCount = cart.reduce((a, b) => a + b.quantity, 0);
 
   const sendWhatsApp = () => {
     if (cart.length === 0) return toast.error("Cart is empty");
-    if (!whatsappNumber) return toast.error("WhatsApp not configured");
-
-    const items = cart
-      .map((i) => `${i.quantity}x ${i.name} - ${i.price} SAR`)
-      .join("%0A");
-
-    const msg = encodeURIComponent(
-      `*New Combo Order!*\n\n*Items:*\n${items}\n\n*Total: ${total} SAR*\n\nPlease reply with your name & delivery address.`
-    );
-
+    const items = cart.map(i => `${i.quantity}× ${i.name}`).join("%0A");
+    const msg = encodeURIComponent(`*Combo Order*\n\n${items}\n\n*Total: ${total} SAR*`);
     window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, "_blank");
+    toast.success("Order sent");
     setCart([]);
     setShowCart(false);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <div className="text-3xl font-light">Loading Combos...</div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <p className="text-2xl font-light text-gray-600 tracking-widest">Curating our best combos...</p>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <>
+      <div className="min-h-screen bg-white">
 
-      {/* HERO */}
-      <div className="container mx-auto px-6 py-16 text-center">
-        <h1 className="text-5xl font-light tracking-wide mb-3">
-          Premium <span className="font-bold">Combo Deals</span>
-        </h1>
-        <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-          Curated black-and-white combo experience — premium, clean & minimal.
-        </p>
-      </div>
-
-      {/* Floating Cart */}
-      <button
-        onClick={() => setShowCart(true)}
-        className="fixed bottom-6 right-6 z-50 bg-white text-black p-5 rounded-full shadow-2xl hover:scale-110 transition-all"
-      >
-        <ShoppingCart size={24} />
-        {cart.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
-            {cart.reduce((a, b) => a + b.quantity, 0)}
-          </span>
-        )}
-      </button>
-
-      {/* COMBO GRID */}
-      <div className="container mx-auto px-6 pb-32">
-        {combos.length === 0 ? (
-          <div className="text-center py-20">
-            <Package size={90} className="mx-auto mb-8 text-gray-600" />
-            <h3 className="text-3xl font-bold">No Combos Yet</h3>
-            <p className="text-gray-400">Check again later.</p>
+        {/* LUXURY HEADER */}
+        <div className="border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-28 text-center">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light text-gray-900 tracking-tight leading-none">
+              Premium Combo Offers
+            </h1>
+            <p className="mt-6 text-xl lg:text-2xl text-gray-600 font-light tracking-wide">
+              Curated bundles for the ultimate experience
+            </p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {combos.map((combo) => (
-              <div
+        </div>
+
+        {/* SMOOTH ANIMATED LUXURY GRID */}
+        <div className="max-w-7xl mx-auto px-6 py-20 lg:py-28">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 lg:gap-14 xl:gap-16">
+            {combos.map((combo, index) => (
+              <motion.div
                 key={combo._id}
-                className="bg-neutral-900 rounded-3xl border border-neutral-800 shadow-xl overflow-hidden group hover:-translate-y-2 transition-all"
+                initial={{ opacity: 0, y: 60 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: index * 0.08, ease: "easeOut" }}
+                whileHover={{ y: -8 }}
+                className="h-full"
               >
-                {/* IMAGE */}
-                <div className="relative h-60 bg-neutral-800">
-                  {combo.image ? (
-                    <Image
-                      src={combo.image}
-                      alt={combo.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-all duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Package size={110} className="text-neutral-700" />
-                    </div>
-                  )}
-
-                  {/* Badge */}
-                  <div className="absolute top-4 left-4 px-4 py-1 bg-white text-black text-sm rounded-full shadow">
-                    <Star size={14} className="inline-block mr-1" /> Combo
-                  </div>
-
-                  {/* Favorite */}
-                  <button
-                    onClick={() => toggleFavorite(combo._id)}
-                    className="absolute top-3 right-3 p-3 bg-white/70 backdrop-blur rounded-full hover:scale-110 transition"
-                  >
-                    <Heart
-                      size={20}
-                      className={
-                        favorites.includes(combo._id)
-                          ? "fill-black text-black"
-                          : "text-black"
-                      }
-                    />
-                  </button>
-                </div>
-
-                {/* CONTENT */}
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">
-                    {combo.title}
-                  </h3>
-
-                  <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                    {combo.description || "Premium curated combo"}
-                  </p>
-
-                  <div className="flex justify-between mb-4">
-                    <div>
-                      <span className="text-3xl font-bold">{combo.price} SAR</span>
-                      {combo.originalPrice && (
-                        <p className="text-gray-500 line-through text-sm">{combo.originalPrice} SAR</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => addToCart(combo)}
-                    className="w-full py-3 bg-white text-black rounded-xl font-semibold hover:bg-neutral-200 transition flex items-center justify-center gap-2"
-                  >
-                    <ShoppingCart size={18} />
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
+                <PremiumComboCard combo={combo} onAdd={addToCart} />
+              </motion.div>
             ))}
           </div>
+
+          {combos.length === 0 && (
+            <div className="text-center py-40">
+              <p className="text-4xl text-gray-400 font-light">No combos available yet</p>
+            </div>
+          )}
+        </div>
+
+        {/* Floating Cart */}
+        {cartCount > 0 && (
+          <button
+            onClick={() => setShowCart(true)}
+            className="fixed bottom-28 right-8 z-50 bg-gray-900 text-white w-20 h-20 rounded-full shadow-2xl hover:shadow-amber-600/40 hover:scale-110 transition-all duration-500 flex items-center justify-center"
+          >
+            <ShoppingCart size={38} />
+            <span className="absolute -top-5 -right-5 bg-gradient-to-br from-amber-500 to-orange-600 text-white w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shadow-2xl">
+              {cartCount}
+            </span>
+          </button>
         )}
-      </div>
 
-      {/* CART MODAL */}
-      {showCart && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center">
-          <div className="bg-neutral-900 w-full max-w-md rounded-t-3xl shadow-2xl border border-neutral-800">
-            <div className="flex justify-between items-center p-6 border-b border-neutral-800">
-              <h2 className="text-xl font-semibold">Your Cart</h2>
-              <button onClick={() => setShowCart(false)}><X size={26} /></button>
-            </div>
+        {/* SAME LUXURY CART AS POPULAR PAGE */}
+        {showCart && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-xl z-50 flex items-end lg:items-center justify-center p-4">
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="bg-white w-full max-w-2xl mx-auto rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[90vh] lg:h-auto lg:max-h-[90vh]"
+            >
+              <div className="p-6 lg:p-8 border-b border-gray-100 flex justify-between items-center flex-shrink-0 bg-white">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Your Order ({cartCount})</h2>
+                <button onClick={() => setShowCart(false)} className="p-3 hover:bg-gray-100 rounded-full transition">
+                  <X size={36} />
+                </button>
+              </div>
 
-            <div className="p-6 max-h-96 overflow-y-auto">
-              {cart.length === 0 ? (
-                <p className="text-center text-gray-400 py-8">Cart is empty</p>
-              ) : (
-                cart.map((item) => (
-                  <div
+              <div className="flex-1 overflow-y-auto px-6 lg:px-8 py-6 space-y-6">
+                {cart.map((item, idx) => (
+                  <motion.div
                     key={item._id}
-                    className="flex items-center gap-4 bg-neutral-800 p-4 rounded-2xl mb-3"
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="flex gap-6 bg-gray-50/80 p-6 rounded-3xl shadow-md"
                   >
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{item.name}</h4>
-                      <p className="text-gray-400 text-sm">{item.price} SAR</p>
+                    <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl overflow-hidden flex-shrink-0 shadow-md">
+                      <Image 
+                        src={item.image || "/placeholder.jpg"} 
+                        alt={item.name} 
+                        width={112} 
+                        height={112} 
+                        className="w-full h-full object-cover" 
+                      />
                     </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => updateQty(item._id, -1)}
-                        className="p-2 bg-neutral-700 rounded-full"
-                      >
-                        <Minus size={16} />
-                      </button>
-
-                      <span className="w-8 text-center font-bold">{item.quantity}</span>
-
-                      <button
-                        onClick={() => updateQty(item._id, 1)}
-                        className="p-2 bg-white text-black rounded-full"
-                      >
-                        <Plus size={16} />
-                      </button>
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <h4 className="text-lg lg:text-xl font-bold text-gray-900 leading-tight">{item.name}</h4>
+                        <p className="text-gray-600 text-sm lg:text-base mt-1">{item.price} SAR each</p>
+                      </div>
+                      <div className="flex items-center gap-5 mt-4">
+                        <button onClick={() => updateQty(item._id, -1)} className="w-12 h-12 rounded-full border-2 border-gray-300 hover:border-gray-900 transition">
+                          <Minus size={20} />
+                        </button>
+                        <span className="text-2xl lg:text-3xl font-bold w-16 text-center">{item.quantity}</span>
+                        <button onClick={() => updateQty(item._id, 1)} className="w-12 h-12 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition">
+                          <Plus size={20} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
+                  </motion.div>
+                ))}
+              </div>
 
-            {cart.length > 0 && (
-              <div className="p-6 border-t border-neutral-800">
-                <div className="flex justify-between text-lg font-bold mb-5">
+              <div className="p-6 lg:p-8 border-t border-gray-100 bg-gradient-to-t from-gray-50 to-white flex-shrink-0">
+                <div className="flex justify-between text-3xl lg:text-4xl font-bold mb-8 text-gray-900">
                   <span>Total</span>
                   <span>{total} SAR</span>
                 </div>
-
                 <button
                   onClick={sendWhatsApp}
-                  className="w-full py-4 bg-white text-black rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-neutral-200"
+                  className="w-full py-7 bg-gray-900 text-white rounded-3xl font-bold text-xl lg:text-2xl hover:bg-gray-800 transition shadow-2xl"
                 >
-                  <Send size={20} />
-                  Send Order via WhatsApp
+                  Checkout via WhatsApp
                 </button>
               </div>
-            )}
+            </motion.div>
+          </div>
+        )}
+
+        <Footer />
+      </div>
+    </>
+  );
+}
+
+// LUXURY COMBO CARD — SAME AS POPULAR PAGE + COMBO BADGE
+function PremiumComboCard({ combo, onAdd }) {
+  return (
+    <motion.div
+      whileHover={{ y: -8 }}
+      className="group relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-700 h-full"
+    >
+      {/* Gold shimmer */}
+      <div className="absolute -inset-1 bg-gradient-to-br from-amber-200/30 via-orange-100/15 to-transparent rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition duration-1000 -z-10" />
+
+      {/* 4:3 Image */}
+      <div className="relative aspect-[4/3] overflow-hidden">
+        {combo.image ? (
+          <Image
+            src={combo.image}
+            alt={combo.title}
+            fill
+            className="object-cover transition-transform duration-1200 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority
+          />
+        ) : (
+          <div className="h-full bg-gradient-to-br from-gray-100 to-gray-200" />
+        )}
+
+        {/* Smart overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+
+        {/* Content */}
+        <div className="absolute inset-0 p-6 lg:p-8 flex flex-col justify-between text-white">
+          <div>
+            <h3 className="text-2xl lg:text-3xl font-bold leading-tight drop-shadow-2xl">
+              {combo.title}
+            </h3>
+            <p className="text-white/90 text-sm lg:text-base font-light leading-relaxed drop-shadow-lg mt-3 line-clamp-2">
+              {combo.description || "Premium curated combo"}
+            </p>
+          </div>
+
+          <div className="flex items-end justify-between">
+            <div>
+              <div className="text-3xl lg:text-4xl font-bold drop-shadow-2xl">
+                {combo.price}
+              </div>
+              <div className="text-lg font-light text-white/90 drop-shadow">SAR</div>
+            </div>
+
+            <button
+              onClick={() => onAdd(combo)}
+              className="group/btn relative px-8 lg:px-10 py-4 bg-white text-gray-900 rounded-3xl font-bold text-base lg:text-lg hover:bg-gray-50 transition-all duration-500 flex items-center gap-3 overflow-hidden shadow-2xl"
+            >
+              <span className="relative z-10">Add to Cart</span>
+              <ShoppingCart className="w-6 h-6 relative z-10 group-hover/btn:translate-x-2 transition" />
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-400/40 to-orange-500/40 scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left duration-600" />
+            </button>
           </div>
         </div>
-      )}
 
-      <Footer />
-    </div>
+        {/* Combo Badge */}
+        <div className="absolute top-6 right-6 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-full text-xs lg:text-sm font-bold shadow-2xl uppercase tracking-wider">
+          Combo Deal
+        </div>
+      </div>
+    </motion.div>
   );
 }

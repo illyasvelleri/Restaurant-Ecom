@@ -1,11 +1,11 @@
-// app/user/menu/page.js → FINAL ULTRA PREMIUM MENU 2025
-// Only 3 categories: Food · Drinks · Desserts
+// app/user/menu/page.js → FINAL PIXEL-PERFECT 2025 LUXURY MENU
 
 "use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Search, ShoppingCart, Heart, X, Plus, Minus } from "lucide-react";
+import { motion } from "framer-motion";
+import { Search, ShoppingCart, X, Plus, Minus } from "lucide-react";
 import toast from "react-hot-toast";
 import Footer from "../../components/footer";
 
@@ -13,13 +13,11 @@ export default function MenuPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState([]);
-  const [favorites, setFavorites] = useState([]);
   const [products, setProducts] = useState([]);
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
 
-  // Only 3 categories — clean and luxurious
   const categories = ["All", "Food", "Drinks", "Desserts"];
 
   useEffect(() => {
@@ -48,49 +46,34 @@ export default function MenuPage() {
     load();
   }, []);
 
-  // Smart filtering: map old categories → new ones
   const normalizeCategory = (cat) => {
     if (!cat) return "Food";
     if (["Appetizers", "Mains", "Pasta", "Burgers", "Salads"].includes(cat)) return "Food";
-    if (cat === "Drinks") return "Drinks";
-    if (cat === "Desserts") return "Desserts";
-    return "Food"; // fallback
+    return cat;
   };
 
   const filteredItems = products
     .filter(p => p.status === 'active')
     .filter(item => {
       const itemCat = normalizeCategory(item.category);
-      const matchesCategory = selectedCategory === "All" || itemCat === selectedCategory;
-      const matchesSearch = searchQuery === "" ||
+      const matchesCat = selectedCategory === "All" || itemCat === selectedCategory;
+      const matchesSearch = !searchQuery ||
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchesCategory && matchesSearch;
+      return matchesCat && matchesSearch;
     });
-
-  const toggleFavorite = (id) => {
-    setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
-  };
 
   const addToCart = (item) => {
     setCart(prev => {
       const exists = prev.find(i => i._id === item._id);
-      if (exists) {
-        return prev.map(i => i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i);
-      }
+      if (exists) return prev.map(i => i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i);
       return [...prev, { ...item, quantity: 1 }];
     });
-    toast("Added", {
-      icon: "Success",
-      style: { background: '#000', color: '#fff', borderRadius: '24px' }
-    });
+    toast.success("Added to order", { style: { borderRadius: "24px", background: "#111", color: "#fff" } });
   };
 
   const updateQty = (id, change) => {
-    setCart(prev => prev
-      .map(i => i._id === id ? { ...i, quantity: i.quantity + change } : i)
-      .filter(i => i.quantity > 0)
-    );
+    setCart(prev => prev.map(i => i._id === id ? { ...i, quantity: i.quantity + change } : i).filter(i => i.quantity > 0));
   };
 
   const total = cart.reduce((s, i) => s + parseFloat(i.price || 0) * i.quantity, 0).toFixed(0);
@@ -98,134 +81,98 @@ export default function MenuPage() {
 
   const sendWhatsApp = () => {
     if (cart.length === 0) return toast.error("Cart is empty");
-    if (!whatsappNumber) return toast.error("WhatsApp not configured");
-
     const items = cart.map(i => `${i.quantity}× ${i.name}`).join("%0A");
     const msg = encodeURIComponent(`*New Order*\n\n${items}\n\n*Total: ${total} SAR*`);
     window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, "_blank");
-    toast.success("Order sent via WhatsApp");
+    toast.success("Order sent");
     setCart([]);
     setShowCart(false);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-white/50 text-xl tracking-widest">Loading exquisite dishes...</p>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <p className="text-2xl font-light text-gray-600 tracking-widest">Curating excellence...</p>
+    </div>
+  );
 
   return (
     <>
-      <div className="min-h-screen bg-black text-white pb-32">
+      <div className="min-h-screen bg-white">
 
-        {/* Top Bar */}
-        <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-3xl border-b border-white/5">
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            <div className="flex items-center justify-between mb-12">
-              <h1 className="text-4xl font-light tracking-wider">Menu</h1>
+        {/* ABSOLUTELY PERFECT HEADER */}
+        {/* PERFECT SINGLE-LINE HEADER — 2025 LUXURY EDITION */}
+        <div className="border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-              <div className="flex items-center gap-6">
-                <div className="relative">
-                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30" size={22} />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search menu..."
-                    className="w-80 lg:w-96 pl-14 pr-6 py-5 bg-white/5 border border-white/10 rounded-3xl focus:outline-none focus:border-white/20 transition placeholder:text-white/30 text-base"
-                  />
-                </div>
+            {/* Title + Search — ONE PERFECT ROW ON PC */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-16 py-16 lg:py-24">
+
+              {/* Left: Title — Single Line, Elegant */}
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light text-gray-900 tracking-tight text-center lg:text-left leading-none">
+                Explore Our Menu
+              </h1>
+
+              {/* Right: Search Bar — Perfectly Aligned */}
+              <div className="relative w-full max-w-xl lg:max-w-2xl xl:max-w-3xl">
+                <Search className="absolute left-8 top-1/2 -translate-y-1/2 text-gray-400" size={32} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for dishes..."
+                  className="w-full pl-24 pr-12 py-7 lg:py-8 bg-gray-50/80 border border-gray-200 rounded-full 
+                     text-xl lg:text-2xl xl:text-3xl font-light
+                     focus:outline-none focus:ring-4 focus:ring-amber-100/60 
+                     transition-all duration-500 text-gray-900 
+                     placeholder:text-gray-500 backdrop-blur-sm
+                     shadow-inner"
+                />
               </div>
             </div>
 
-            {/* Mobile-First Category Tabs — Beautiful on every screen */}
-            <div className="flex flex-wrap justify-center gap-4 px-6">
+            {/* Category Pills — Elegant & Centered */}
+            <div className="flex flex-wrap justify-center gap-6 lg:gap-8 pb-16 lg:pb-20">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
                   className={`
-        flex-1 min-w-0 max-w-[160px]  /* perfect size on mobile */
-        px-8 py-4
-        rounded-full
-        text-base sm:text-lg font-medium
-        whitespace-nowrap
-        transition-all duration-300
-        border-2
-        ${selectedCategory === cat
-                      ? "bg-white text-black border-white shadow-lg"
-                      : "border-white/10 text-white/70 hover:bg-white/5 hover:text-white hover:border-white/20"
+            px-10 lg:px-14 py-5 rounded-full text-lg lg:text-xl font-medium 
+            transition-all duration-500 border-2 shadow-md hover:shadow-xl
+            ${selectedCategory === cat
+                      ? "bg-gray-900 text-white border-gray-900"
+                      : "bg-white text-gray-700 border-gray-200 hover:border-gray-900 hover:text-gray-900"
                     }
-      `}
+          `}
                 >
                   {cat}
                 </button>
               ))}
             </div>
+
           </div>
         </div>
 
-        {/* Menu Grid – 2 Columns Mobile & Desktop */}
-        <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
-            {filteredItems.map((item) => (
-              <div
+        {/* PERFECT GRID — NO MORE BORING SPACING */}
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-28">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-10 lg:gap-14 xl:gap-16">
+            {filteredItems.map((item, index) => (
+              <motion.div
                 key={item._id}
-                className="group bg-white/4 border border-white/10 rounded-3xl overflow-hidden hover:bg-white/6 transition-all duration-500"
+                initial={{ opacity: 0, y: 60 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: index * 0.08, ease: "easeOut" }}
+                whileHover={{ y: -8 }}
+                className="h-full"
               >
-                <div className="relative h-96 overflow-hidden">
-                  {item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000"
-                    />
-                  ) : (
-                    <div className="h-full bg-gradient-to-br from-zinc-900 to-black" />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-70" />
-
-                  <button
-                    onClick={() => toggleFavorite(item._id)}
-                    className="absolute top-8 right-8 p-4 bg-black/50 backdrop-blur-md border border-white/20 rounded-full hover:bg-white/20 transition"
-                  >
-                    <Heart
-                      size={22}
-                      className={favorites.includes(item._id) ? "fill-white" : "text-white/50"}
-                    />
-                  </button>
-                </div>
-
-                <div className="p-10">
-                  <h3 className="text-2xl font-medium mb-4">{item.name}</h3>
-                  <p className="text-white/60 text-base leading-relaxed mb-10">
-                    {item.description || "Prepared with precision and passion"}
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-4xl font-light tracking-tight">
-                      {item.price} <span className="text-white/40 text-xl">SAR</span>
-                    </div>
-
-                    <button
-                      onClick={() => addToCart(item)}
-                      className="px-12 py-5 bg-white text-black rounded-3xl font-medium hover:bg-gray-100 transition flex items-center gap-3"
-                    >
-                      <ShoppingCart size={22} />
-                      Add
-                    </button>
-                  </div>
-                </div>
-              </div>
+                <PixelPerfectCard key={item._id} dish={item} onAdd={addToCart} />
+              </motion.div>
             ))}
           </div>
 
           {filteredItems.length === 0 && (
-            <div className="text-center py-32">
-              <p className="text-2xl text-white/30 font-light">No items found</p>
+            <div className="text-center py-40">
+              <p className="text-4xl text-gray-400 font-light">No dishes found</p>
             </div>
           )}
         </div>
@@ -234,65 +181,151 @@ export default function MenuPage() {
         {cartCount > 0 && (
           <button
             onClick={() => setShowCart(true)}
-            className="fixed bottom-10 right-10 z-50 bg-white text-black p-7 rounded-full shadow-2xl hover:scale-110 transition"
+            className="fixed bottom-28 right-8 z-50 bg-gray-900 text-white w-20 h-20 rounded-full shadow-2xl hover:shadow-amber-600/40 hover:scale-110 transition-all duration-500 flex items-center justify-center"
           >
-            <ShoppingCart size={32} />
-            <span className="absolute -top-4 -right-4 bg-black text-white text-lg font-medium w-12 h-12 rounded-full flex items-center justify-center">
+            <ShoppingCart size={38} />
+            <span className="absolute -top-5 -right-5 bg-gradient-to-br from-amber-500 to-orange-600 text-white w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shadow-2xl">
               {cartCount}
             </span>
           </button>
         )}
 
-        {/* Cart Bottom Sheet */}
+        {/* FINAL RESPONSIVE LUXURY CART — PERFECT ON ALL DEVICES */}
         {showCart && (
-          <div className="fixed inset-0 bg-black/90 z-50 flex items-end">
-            <div className="bg-black border-t border-white/10 w-full max-w-2xl mx-auto rounded-t-3xl">
-              <div className="flex justify-between items-center p-10 border-b border-white/10">
-                <h2 className="text-2xl font-light">Your Order ({cartCount})</h2>
-                <button onClick={() => setShowCart(false)} className="p-3 hover:bg-white/10 rounded-xl transition">
-                  <X size={28} />
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-xl z-50 flex items-end lg:items-center justify-center p-4">
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="bg-white w-full max-w-2xl mx-auto rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[90vh] lg:h-auto lg:max-h-[90vh]"
+            >
+              {/* Header */}
+              <div className="p-6 lg:p-8 border-b border-gray-100 flex justify-between items-center flex-shrink-0 bg-white">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Your Order ({cartCount})</h2>
+                <button onClick={() => setShowCart(false)} className="p-3 hover:bg-gray-100 rounded-full transition">
+                  <X size={36} />
                 </button>
               </div>
 
-              <div className="p-10 space-y-6 max-h-96 overflow-y-auto">
-                {cart.map((item) => (
-                  <div key={item._id} className="flex justify-between items-center border-b border-white/5 pb-6">
-                    <div>
-                      <p className="text-lg font-medium">{item.quantity}× {item.name}</p>
-                      <p className="text-white/50">{item.price} SAR each</p>
+              {/* Scrollable Items */}
+              <div className="flex-1 overflow-y-auto px-6 lg:px-8 py-6 space-y-6">
+                {cart.map((item, idx) => (
+                  <motion.div
+                    key={item._id}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="flex gap-6 bg-gray-50/80 p-6 rounded-3xl shadow-md"
+                  >
+                    <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl overflow-hidden flex-shrink-0 shadow-md">
+                      <Image
+                        src={item.image || "/placeholder.jpg"}
+                        alt={item.name}
+                        width={112}
+                        height={112}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <div className="flex items-center gap-5">
-                      <button onClick={() => updateQty(item._id, -1)} className="w-12 h-12 rounded-full border border-white/20 hover:bg-white/10 transition">
-                        <Minus size={20} />
-                      </button>
-                      <span className="w-16 text-center text-xl">{item.quantity}</span>
-                      <button onClick={() => updateQty(item._id, 1)} className="w-12 h-12 rounded-full bg-white text-black hover:bg-gray-200 transition">
-                        <Plus size={20} />
-                      </button>
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <h4 className="text-lg lg:text-xl font-bold text-gray-900 leading-tight">{item.name}</h4>
+                        <p className="text-gray-600 text-sm lg:text-base mt-1">{item.price} SAR each</p>
+                      </div>
+                      <div className="flex items-center gap-5 mt-4">
+                        <button onClick={() => updateQty(item._id, -1)} className="w-12 h-12 rounded-full border-2 border-gray-300 hover:border-gray-900 transition">
+                          <Minus size={20} />
+                        </button>
+                        <span className="text-2xl lg:text-3xl font-bold w-16 text-center">{item.quantity}</span>
+                        <button onClick={() => updateQty(item._id, 1)} className="w-12 h-12 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition">
+                          <Plus size={20} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
-              <div className="p-10 border-t border-white/10">
-                <div className="flex justify-between text-3xl font-light mb-10">
+              {/* Total + Checkout */}
+              <div className="p-6 lg:p-8 border-t border-gray-100 bg-gradient-to-t from-gray-50 to-white flex-shrink-0">
+                <div className="flex justify-between text-3xl lg:text-4xl font-bold mb-8 text-gray-900">
                   <span>Total</span>
                   <span>{total} SAR</span>
                 </div>
                 <button
                   onClick={sendWhatsApp}
-                  className="w-full py-6 bg-white text-black rounded-3xl font-medium hover:bg-gray-100 transition text-lg"
+                  className="w-full py-7 bg-gray-900 text-white rounded-3xl font-bold text-xl lg:text-2xl hover:bg-gray-800 transition shadow-2xl"
                 >
-                  Send Order via WhatsApp
+                  Checkout via WhatsApp
                 </button>
               </div>
-            </div>
+            </motion.div>
           </div>
         )}
-      </div>
 
-      {/* Footer */}
-      <Footer />
+        <Footer />
+      </div >
     </>
+  );
+}
+
+// PIXEL-PERFECT 2025 LUXURY CARD
+function PixelPerfectCard({ dish, onAdd }) {
+  return (
+    <div className="group relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-700">
+      {/* Gold shimmer */}
+      <div className="absolute -inset-1 bg-gradient-to-br from-amber-200/25 via-orange-100/15 to-transparent rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition duration-1000 -z-10" />
+
+      {/* 4:3 Image with overlay */}
+      <div className="relative aspect-[4/3] overflow-hidden">
+        {dish.image ? (
+          <Image
+            src={dish.image}
+            alt={dish.name}
+            fill
+            className="object-cover transition-transform duration-1200 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority
+          />
+        ) : (
+          <div className="h-full bg-gradient-to-br from-gray-100 to-gray-200" />
+        )}
+
+        {/* Perfect overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
+
+        {/* Content over image */}
+        <div className="absolute inset-0 p-6 lg:p-8 flex flex-col justify-between text-white">
+          {/* Top: Name + Description */}
+          <div className="mb-3">
+            <h3 className="text-2xl lg:text-3xl font-bold leading-tight drop-shadow-2xl max-w-[70%]">
+              {dish.name}
+            </h3>
+            <p className="text-sm lg:text-base font-light leading-relaxed drop-shadow-md mt-2 opacity-95 line-clamp-2">
+              {dish.description || "Premium ingredients, exceptional taste"}
+            </p>
+          </div>
+
+          {/* Bottom: Price + Button */}
+          <div className="flex items-end justify-between">
+            <div>
+              <div className="text-3xl lg:text-4xl font-bold drop-shadow-2xl">
+                {dish.price}
+              </div>
+              <div className="text-lg font-light text-white/90 drop-shadow">SAR</div>
+            </div>
+
+            <button
+              onClick={() => onAdd(dish)}
+              className="group/btn relative px-8 lg:px-10 py-4 bg-white text-gray-900 rounded-3xl font-bold text-base lg:text-lg hover:bg-gray-50 transition-all duration-500 flex items-center gap-3 overflow-hidden shadow-2xl"
+            >
+              <span className="relative z-10">Add to Cart</span>
+              <ShoppingCart className="w-6 h-6 relative z-10 group-hover/btn:translate-x-2 transition" />
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-400/40 to-orange-500/40 scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left duration-600" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
