@@ -571,7 +571,7 @@ function PremiumFoodCard({ dish, onAdd, isPopular = false }) {
                 onClick={() => onAdd(dish)}
                 className="group/btn relative flex items-center gap-2.5 px-7 lg:px-9 py-4 bg-white text-gray-900 rounded-2xl font-bold text-base lg:text-lg hover:bg-gray-50 transition-all duration-400 shadow-xl overflow-hidden"
               >
-                <span className="relative z-10">Add</span>
+                <span className="relative z-10">Add to Cart</span>
                 <Plus className="w-5 h-5 lg:w-6 lg:h-6 relative z-10 transition group-hover/btn:scale-110" />
 
                 {/* Gold flash effect */}
