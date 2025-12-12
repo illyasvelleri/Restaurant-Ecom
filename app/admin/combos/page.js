@@ -3,12 +3,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { 
+import {
   Search, Plus, X, Upload, Check, ChevronRight,
-  Package, Loader2 
+  Package, Loader2
 } from 'lucide-react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import AdminFooter from '../../components/footer';
 
 const MAX_COMBOS = 10;
 
@@ -186,9 +187,8 @@ export default function ComboOffersPage() {
                 <button
                   key={product._id}
                   onClick={() => toggleProduct(product)}
-                  className={`relative bg-white rounded-2xl shadow-sm border-2 transition-all overflow-hidden ${
-                    selected ? "border-black ring-4 ring-black/10" : "border-gray-200"
-                  }`}
+                  className={`relative bg-white rounded-2xl shadow-sm border-2 transition-all overflow-hidden ${selected ? "border-black ring-4 ring-black/10" : "border-gray-200"
+                    }`}
                 >
                   <div className="relative h-32 bg-gradient-to-br from-gray-50 to-gray-100">
                     {product.image ? (
@@ -251,6 +251,7 @@ export default function ComboOffersPage() {
           }}
         />
       )}
+      <AdminFooter />
     </div>
   );
 }

@@ -38,3 +38,12 @@ body {
   scrollbar-width: none;     /* Firefox */
 }
 
+
+/* Perfect invisible scrollbar — must be in globals.css */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

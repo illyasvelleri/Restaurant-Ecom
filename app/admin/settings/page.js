@@ -1,73 +1,52 @@
-// app/admin/settings/page.js
+// app/admin/settings/page.js → FINAL 2025 MOBILE-FIRST LUXURY (LIKE YOUR SAMPLE)
 
 "use client";
 
 import { useState, useEffect } from 'react';
-import { User, Home, Lock, Bell, CreditCard, Truck, CheckCircle, Save } from 'lucide-react';
+import {
+  User, Home, Lock, Bell, CreditCard, Truck,
+  Save, CheckCircle
+} from 'lucide-react';
 import ProfileSettings from '../components/ProfileSettings';
 import RestaurantSettings from '../components/RestaurantSettings';
 import SecuritySettings from '../components/SecuritySettings';
 import NotificationSettings from '../components/NotificationSettings';
 import PaymentSettings from '../components/PaymentSettings';
 import DeliverySettings from '../components/DeliverySettings';
+import AdminFooter from '../../components/footer';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
-  const [activePage, setActivePage] = useState('settings');
   const [activeTab, setActiveTab] = useState('profile');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
-  const user = { username: "Admin1", role: "admin" };
+  const [username, setUsername] = useState("Admin");
 
-  const [profileData, setProfileData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    address: ''
-  });
+  const [profileData, setProfileData] = useState({ fullName: '', email: '', phone: '', address: '' });
+  const [restaurantData, setRestaurantData] = useState({ name: '', email: '', phone: '', whatsapp: '', address: '', website: '' });
+  const [notificationSettings, setNotificationSettings] = useState({ whatsappNotifications: true, pushNotifications: true, smsNotifications: false });
+  const [deliverySettings, setDeliverySettings] = useState({ deliveryEnabled: true, deliveryFee: '5.00', minOrderAmount: '15.00' });
 
-  const [restaurantData, setRestaurantData] = useState({
-    name: '',
-    description: '',
-    email: '',
-    phone: '',
-    whatsapp: '',
-    address: '',
-    website: '',
-    timezone: 'Asia/Riyadh',
-    currency: 'SAR'
-  });
-
-  const [notificationSettings, setNotificationSettings] = useState({
-    emailNotifications: true,
-    pushNotifications: true,
-    smsNotifications: false,
-    orderNotifications: true,
-    customerNotifications: true,
-    inventoryAlerts: true,
-    reportEmails: true
-  });
-
-  const [deliverySettings, setDeliverySettings] = useState({
-    deliveryEnabled: true,
-    deliveryRadius: '10',
-    deliveryFee: '5.00',
-    minOrderAmount: '15.00',
-    estimatedTime: '30-45'
-  });
-
-  // Load from DB — FIXED: added restaurantData to dependency array
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/admin/settings');
-        if (!res.ok) throw new Error();
-        const data = await res.json();
+        const [userRes, settingsRes] = await Promise.all([
+          fetch('/api/auth/me'),
+          fetch('/api/admin/settings')
+        ]);
 
-        if (data.profile) setProfileData(data.profile);
-        if (data.restaurant) setRestaurantData(prev => ({ ...prev, ...data.restaurant }));
-        if (data.notifications) setNotificationSettings(data.notifications);
-        if (data.delivery) setDeliverySettings(data.delivery);
+        if (userRes.ok) {
+          const data = await userRes.json();
+          setUsername(data.user?.username || "Admin");
+        }
+
+        if (settingsRes.ok) {
+          const data = await settingsRes.json();
+          if (data.profile) setProfileData(data.profile);
+          if (data.restaurant) setRestaurantData(prev => ({ ...prev, ...data.restaurant }));
+          if (data.notifications) setNotificationSettings(data.notifications);
+          if (data.delivery) setDeliverySettings(data.delivery);
+        }
       } catch (err) {
         toast.error('Failed to load settings');
       } finally {
@@ -75,9 +54,8 @@ export default function SettingsPage() {
       }
     };
     load();
-  }, [restaurantData]); // ← Now includes restaurantData → warning gone
+  }, []);
 
-  // Save to DB
   const handleSave = async () => {
     try {
       const res = await fetch('/api/admin/settings', {
@@ -92,16 +70,13 @@ export default function SettingsPage() {
       });
 
       if (!res.ok) throw new Error();
-
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
-      toast.success('Settings saved!');
-    } catch (err) {
+      toast.success('Settings saved successfully!');
+    } catch {
       toast.error('Failed to save');
     }
   };
-
-  // ... rest of your code (tabs, JSX, etc.) remains 100% unchanged
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
@@ -114,82 +89,102 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="text-lg text-gray-600">Loading settings...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-lg text-gray-600">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <div className="flex-1 flex flex-col overflow-hidden"> 
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-              <p className="text-gray-600">Manage your account and restaurant preferences</p>
-            </div>
+    <div className="min-h-screen bg-gray-50 pb-28">
 
-            {saveSuccess && (
-              <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-                <CheckCircle className="text-green-600" size={20} />
-                <p className="text-green-800 font-medium">Settings saved successfully!</p>
-              </div>
-            )}
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="border-b border-gray-200">
-                <div className="flex overflow-x-auto">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
-                        activeTab === tab.id
-                          ? 'text-orange-600 border-b-2 border-orange-600'
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <tab.icon size={18} />
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="p-6">
-                {activeTab === 'profile' && (
-                  <ProfileSettings profileData={profileData} setProfileData={setProfileData} user={user} />
-                )}
-                {activeTab === 'restaurant' && (
-                  <RestaurantSettings restaurantData={restaurantData} setRestaurantData={setRestaurantData} />
-                )}
-                {activeTab === 'security' && (
-                  <SecuritySettings />
-                )}
-                {activeTab === 'notifications' && (
-                  <NotificationSettings notificationSettings={notificationSettings} setNotificationSettings={setNotificationSettings} />
-                )}
-                {activeTab === 'payment' && (
-                  <PaymentSettings />
-                )}
-                {activeTab === 'delivery' && (
-                  <DeliverySettings deliverySettings={deliverySettings} setDeliverySettings={setDeliverySettings} />
-                )}
-                <div className="pt-6">
-                  <button
-                    onClick={handleSave}
-                    className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all font-medium"
-                  >
-                    <Save size={18} />
-                    Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
+      {/* HEADER */}
+      <div className="bg-white border-b border-gray-200 px-5 py-6">
+        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+        <p className="text-sm text-gray-500 mt-1">{username} • Manage your account</p>
       </div>
+
+      {/* SUCCESS MESSAGE */}
+      {saveSuccess && (
+        <div className="mx-4 mt-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
+          <CheckCircle className="text-emerald-600 flex-shrink-0" size={20} />
+          <p className="font-medium text-emerald-800 text-sm">All changes saved!</p>
+        </div>
+      )}
+
+      {/* MOBILE-FIRST TABS — EXACTLY LIKE YOUR SAMPLE */}
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-30">
+        <div className="overflow-x-auto hide-scrollbar px-4 py-4">
+          <div className="flex gap-2 min-w-max">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`
+                    flex items-center gap-2 px-5 py-2.5
+                    rounded-full font-medium whitespace-nowrap
+                    transition-all duration-300
+                    ${active
+                      ? "bg-gray-900 text-white shadow-lg"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }
+                  `}
+                >
+                  <Icon size={18} />
+                  <span className="text-sm">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* CONTENT AREA */}
+      <div className="px-4 py-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          {activeTab === 'profile' && <ProfileSettings profileData={profileData} setProfileData={setProfileData} />}
+          {activeTab === 'restaurant' && <RestaurantSettings restaurantData={restaurantData} setRestaurantData={setRestaurantData} />}
+          {activeTab === 'security' && <SecuritySettings />}
+          {activeTab === 'notifications' && (
+            <NotificationSettings
+              notificationSettings={notificationSettings}
+              setNotificationSettings={setNotificationSettings}
+            />
+          )}
+          {activeTab === 'payment' && <PaymentSettings />}
+          {activeTab === 'delivery' && (
+            <DeliverySettings
+              deliverySettings={deliverySettings}
+              setDeliverySettings={setDeliverySettings}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* FIXED SAVE BUTTON */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-30">
+        <button
+          onClick={handleSave}
+          className="w-full py-4 bg-gray-900 text-white rounded-xl font-semibold text-base hover:bg-gray-800 transition flex items-center justify-center gap-2 shadow-lg"
+        >
+          <Save size={20} />
+          Save All Changes
+        </button>
+      </div>
+      <AdminFooter />
+      {/* HIDE SCROLLBAR — REQUIRED */}
+      <style jsx>{`
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }

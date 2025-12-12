@@ -8,6 +8,7 @@ import {
   Mail, ShoppingCart, DollarSign, Star, Eye
 } from 'lucide-react';
 import CustomerModal from '../components/CustomerModal';
+import AdminFooter from '../../components/footer';
 import toast from 'react-hot-toast';
 
 export default function CustomersPage() {
@@ -160,7 +161,7 @@ export default function CustomersPage() {
           </div>
         )}
       </div>
-
+      <AdminFooter />
       {/* MODAL */}
       {selectedCustomer && (
         <CustomerModal

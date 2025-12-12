@@ -147,7 +147,7 @@ import {
     CartesianGrid,
     Tooltip
 } from 'recharts';
-
+import AdminFooter from '../../components/footer';
 import toast from 'react-hot-toast';
 
 export default function AnalyticsPage() {
@@ -316,6 +316,7 @@ export default function AnalyticsPage() {
                     </ResponsiveContainer>
                 </div>
             </div>
+            <AdminFooter />
         </div>
     );
 }

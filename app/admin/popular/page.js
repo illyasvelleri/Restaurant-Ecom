@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Search, Star, Plus, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import AdminFooter from '../../components/footer';
 
 const MAX_POPULAR = 8;
 
@@ -201,6 +202,7 @@ export default function PopularProductsPage() {
           </div>
         )}
       </div>
+      <AdminFooter />
     </div>
   );
 }

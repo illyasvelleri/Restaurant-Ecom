@@ -3,11 +3,12 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { 
-  Package, Plus, Search, MoreVertical, Edit3, 
-  Trash2, Eye, AlertCircle, CheckCircle2, X 
+import {
+  Package, Plus, Search, MoreVertical, Edit3,
+  Trash2, Eye, AlertCircle, CheckCircle2, X
 } from 'lucide-react';
 import ProductModal from '../components/ProductModal';
+import AdminFooter from '../../components/footer';
 import toast from 'react-hot-toast';
 
 export default function ProductsPage() {
@@ -60,7 +61,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50">
 
       {/* STICKY HEADER */}
       <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
@@ -147,11 +148,10 @@ export default function ProductsPage() {
                     <p className="text-sm text-gray-500">{product.category}</p>
                     <div className="flex items-center gap-3 mt-2">
                       <span className="text-xl font-bold text-gray-900">{product.price} SAR</span>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                        product.status === 'active' 
-                          ? 'bg-emerald-100 text-emerald-700' 
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${product.status === 'active'
+                          ? 'bg-emerald-100 text-emerald-700'
                           : 'bg-gray-100 text-gray-600'
-                      }`}>
+                        }`}>
                         {product.status}
                       </span>
                     </div>
@@ -196,7 +196,7 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
-
+      <AdminFooter />
       {/* MODAL */}
       {showModal && (
         <ProductModal
