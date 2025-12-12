@@ -172,7 +172,7 @@ import ProfileIcon from "./ProfileIcon"; // ← Your real ProfileIcon component
 
 export default function Navbar() {
   const pathname = usePathname();
-  
+
   // Fetch restaurant name & logo from API
   const [restaurant, setRestaurant] = useState({ name: "Loading...", logo: null });
   const [loading, setLoading] = useState(true);
@@ -212,7 +212,7 @@ export default function Navbar() {
       {/* DESKTOP NAVBAR — EXACT YOUR DESIGN */}
       <nav className="hidden lg:flex fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-2xl border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-8 py-6 flex items-center">
-          
+
           {/* LEFT: Logo + Restaurant Name (FROM API) */}
           <a href="/" className="flex items-center gap-6">
             {/* Logo */}
@@ -245,11 +245,10 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-lg font-medium transition-all duration-300 ${
-                    pathname === link.href
-                      ? "text-gray-900"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
+                  className={`text-lg font-medium transition-all duration-300 ${pathname === link.href
+                    ? "text-gray-900"
+                    : "text-gray-600 hover:text-gray-900"
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -291,27 +290,64 @@ export default function Navbar() {
       </div>
 
       {/* MOBILE BOTTOM NAV */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-2xl">
-        <div className="flex justify-around py-3">
+      {/* MOBILE BOTTOM NAV — WATER DROP CURVED NOTCH */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200">
+        <div className="flex justify-around items-end py-2 relative">
+
           {navLinks.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.href;
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 px-5 py-3 rounded-xl transition-all ${
-                  active ? "text-gray-900" : "text-gray-500"
-                }`}
+                className="relative flex flex-col items-center justify-end min-w-[70px]"
               >
-                <Icon size={26} />
-                <span className="text-xs font-medium">{item.label}</span>
-                {active && <div className="w-1.5 h-1.5 bg-gray-900 rounded-full mt-1" />}
+                {/* ACTIVE WATER DROP SHAPE (behind icon only) */}
+                {active && (
+                  <div
+                    className="
+                absolute 
+                -top-4
+                w-14
+                h-14
+                bg-white
+                rounded-b-full rounded-t-3xl
+                border border-gray-200/50
+                shadow-md
+                z-0
+              "
+                    style={{
+                      clipPath:
+                        "path('M0,28 Q28,-2 56,28 Q28,40 0,28 Z')",
+                    }}
+                  ></div>
+                )}
+
+                {/* ICON */}
+                <div
+                  className={`relative z-10 transition-all duration-300 ${active ? "text-gray-900 scale-110 -translate-y-1" : "text-gray-500"
+                    }`}
+                >
+                  <Icon size={26} />
+                </div>
+
+                {/* LABEL (DOES NOT MOVE) */}
+                <span
+                  className={`relative z-10 text-xs mt-1 transition-all ${active ? "text-gray-900 font-medium" : "text-gray-500"
+                    }`}
+                >
+                  {item.label}
+                </span>
               </Link>
             );
           })}
+
         </div>
       </div>
+
+
 
       <div className="h-20 lg:h-24" />
     </>

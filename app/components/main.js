@@ -282,12 +282,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { ShoppingCart, ChevronRight, Send, Plus, Minus, X } from "lucide-react";
 
 export default function MainContent() {
+  const router = useRouter();
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [specialDishes, setSpecialDishes] = useState([]);
@@ -331,22 +333,42 @@ export default function MainContent() {
   }, []);
 
   const addToCart = (item) => {
-    setCart((prev) => {
-      const exists = prev.find((i) => i._id === item._id);
+    setCart(prev => {
+      const exists = prev.find(i => i._id === item._id);
+      let newCart;
+
       if (exists) {
-        return prev.map((i) => (i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i));
+        newCart = prev.map(i =>
+          i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      } else {
+        newCart = [...prev, { ...item, quantity: 1 }];
       }
-      return [...prev, { ...item, quantity: 1 }];
+
+      // THIS LINE SAVES CART TO LOCAL STORAGE (so checkout page can read it)
+      localStorage.setItem("cart", JSON.stringify(newCart));
+
+      return newCart;
     });
-    toast.success("Added to cart");
+
+    toast.success("Added to order", {
+      style: { borderRadius: "24px", background: "#111", color: "#fff" }
+    });
   };
 
   const updateQty = (id, change) => {
-    setCart((prev) =>
-      prev
-        .map((i) => (i._id === id ? { ...i, quantity: i.quantity + change } : i))
-        .filter((i) => i.quantity > 0)
-    );
+    setCart(prev => {
+      const updated = prev
+        .map(i =>
+          i._id === id ? { ...i, quantity: i.quantity + change } : i
+        )
+        .filter(i => i.quantity > 0);
+
+      // SAVE UPDATED CART TO STORAGE
+      localStorage.setItem("cart", JSON.stringify(updated));
+
+      return updated;
+    });
   };
 
   const total = cart.reduce((s, i) => s + parseFloat(i.price || 0) * i.quantity, 0).toFixed(0);
@@ -420,7 +442,7 @@ export default function MainContent() {
       {cartCount > 0 && (
         <button
           onClick={() => setShowCart(true)}
-          className="fixed bottom-6 right-6 z-50 bg-gray-900 text-white p-5 lg:p-7 rounded-full shadow-2xl hover:shadow-amber-600/40 hover:scale-110 transition-all duration-500 flex items-center gap-4"
+          className="fixed bottom-28 right-6 z-50 bg-gray-900 text-white p-5 lg:p-7 rounded-full shadow-2xl hover:shadow-amber-600/40 hover:scale-110 transition-all duration-500 flex items-center gap-4"
         >
           <ShoppingCart size={28} />
           <span className="absolute -top-3 -right-3 bg-gradient-to-br from-amber-500 to-orange-600 text-white w-10 h-10 rounded-full flex items-center justify-center text-lg font-medium shadow-xl">
@@ -464,10 +486,13 @@ export default function MainContent() {
                 <span>{total} SAR</span>
               </div>
               <button
-                onClick={sendOrder}
-                className="w-full py-6 lg:py-7 bg-gray-900 text-white rounded-3xl font-bold text-xl hover:bg-gray-800 transition shadow-xl"
+                onClick={() => {
+                  if (cart.length === 0) return toast.error("Cart is empty");
+                  router.push("/user/checkout"); // New page!
+                }}
+                className="w-full py-7 bg-gray-900 text-white rounded-3xl font-bold text-xl lg:text-2xl hover:bg-gray-800 transition shadow-2xl"
               >
-                Send Order via WhatsApp
+                Proceed to Delivery
               </button>
             </div>
           </div>
@@ -548,7 +573,7 @@ function PremiumFoodCard({ dish, onAdd, isPopular = false }) {
               >
                 <span className="relative z-10">Add</span>
                 <Plus className="w-5 h-5 lg:w-6 lg:h-6 relative z-10 transition group-hover/btn:scale-110" />
-                
+
                 {/* Gold flash effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-400/40 to-orange-500/40 scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left duration-500" />
               </button>
