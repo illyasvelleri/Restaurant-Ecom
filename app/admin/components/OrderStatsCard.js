@@ -1,3 +1,5 @@
+//admin/components/OrderStatsCard
+
 "use client";
 
 const OrderStatsCard = ({ title, value, icon: Icon, color, percentage }) => {

@@ -1,93 +1,48 @@
-// app/admin/products/page.js
+// app/admin/products/page.js → FINAL 2025 SHOPIFY-STYLE (WITH DELETE + PERFECT UI)
 
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Package, BarChart3, DollarSign, TrendingUp, Download, Plus, Loader2 } from 'lucide-react';
-import ProductStatsCard from '../components/ProductStatsCard';
+import { 
+  Package, Plus, Search, MoreVertical, Edit3, 
+  Trash2, Eye, AlertCircle, CheckCircle2, X 
+} from 'lucide-react';
 import ProductModal from '../components/ProductModal';
-import ProductCard from '../components/ProductCard';
 import toast from 'react-hot-toast';
 
 export default function ProductsPage() {
-  const [activePage, setActivePage] = useState('products');
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [filterCategory, setFilterCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const user = { username: "Admin1", role: "admin" };
-
-  // Fetch products
   const fetchProducts = async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/products');
-      if (!res.ok) throw new Error('Failed to fetch');
+      if (!res.ok) throw new Error();
       const data = await res.json();
       setProducts(data || []);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Failed to load products');
-      setProducts([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useEffect(() => { fetchProducts(); }, []);
 
-  // Stats
-  const totalProducts = products.length;
-  const activeProducts = products.filter(p => p.status === 'active').length;
-  const lowStock = products.filter(p => p.stock < 10 && p.status === 'active').length;
-  const totalRevenue = products
-    .reduce((sum, p) => sum + (p.sales || 0) * parseFloat(p.price || 0), 0)
-    .toFixed(2);
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const stats = [
-    { title: 'Total Products', value: totalProducts, icon: Package, color: 'bg-gradient-to-br from-blue-400 to-blue-600', percentage: 8.2 },
-    { title: 'Active Products', value: activeProducts, icon: BarChart3, color: 'bg-gradient-to-br from-green-400 to-green-600', percentage: 12.5 },
-    { title: 'Low Stock Items', value: lowStock, icon: TrendingUp, color: 'bg-gradient-to-br from-yellow-400 to-yellow-600', percentage: lowStock > 0 ? -5.3 : 0 },
-    { title: 'Total Revenue', value: `$${parseFloat(totalRevenue).toLocaleString()}`, icon: DollarSign, color: 'bg-gradient-to-br from-purple-400 to-purple-600', percentage: 18.7 },
-  ];
-
-  const filteredProducts = filterCategory === 'all'
-    ? products
-    : products.filter(p => p.category === filterCategory);
-
-  // Save product
-  const handleSaveProduct = async (formData) => {
-    setSaving(true);
-    try {
-      const method = selectedProduct ? 'PUT' : 'POST';
-      const res = await fetch('/api/admin/products', {
-        method,
-        body: formData,
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) throw new Error(result.error || 'Failed to save product');
-
-      toast.success(selectedProduct ? 'Product updated!' : 'Product added!');
-      setShowModal(false);
-      setSelectedProduct(null);
-      await fetchProducts();
-    } catch (err) {
-      console.error('Save error:', err);
-      toast.error(err.message || 'Failed to save product');
-    } finally {
-      setSaving(false);
-    }
-  };
+  const activeCount = products.filter(p => p.status === 'active').length;
+  const lowStockCount = products.filter(p => p.stock < 10 && p.stock > 0).length;
+  const outOfStockCount = products.filter(p => p.stock === 0).length;
 
   const handleDelete = async (product) => {
-    if (!confirm(`Delete &quot;${product.name}&quot;? This cannot be undone.`)) return;
+    if (!confirm(`Delete "${product.name}" permanently?`)) return;
 
     try {
       const res = await fetch('/api/admin/products', {
@@ -96,108 +51,153 @@ export default function ProductsPage() {
         body: JSON.stringify({ id: product._id }),
       });
 
-      if (!res.ok) throw new Error('Delete failed');
-
+      if (!res.ok) throw new Error();
       toast.success('Product deleted');
-      fetchProducts();
-    } catch (err) {
-      toast.error('Could not delete product');
+      await fetchProducts();
+    } catch {
+      toast.error('Failed to delete');
     }
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Products Management</h1>
-              <p className="text-gray-600">Manage your restaurant menu and inventory</p>
+    <div className="min-h-screen bg-gray-50 pb-24">
+
+      {/* STICKY HEADER */}
+      <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+              <p className="text-sm text-gray-500">{products.length} items</p>
             </div>
+            <button
+              onClick={() => { setSelectedProduct(null); setShowModal(true); }}
+              className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center shadow-xl hover:scale-105 transition"
+            >
+              <Plus size={26} strokeWidth={3} />
+            </button>
+          </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {stats.map((stat) => (
-                <ProductStatsCard key={stat.title} {...stat} />
-              ))}
-            </div>
+          {/* SEARCH */}
+          <div className="relative">
+            <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search products..."
+              className="w-full pl-12 pr-5 py-4 bg-gray-100 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-black/10"
+            />
+          </div>
+        </div>
+      </div>
 
-            {/* Filters & Actions */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
-              <div className="p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1">
-                    <button
-                      onClick={() => setFilterCategory('all')}
-                      className={`px-4 py-2 rounded-md text-sm font-medium transition ${filterCategory === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600'}`}
-                    >
-                      All
-                    </button>
+      {/* COMPACT STATS */}
+      <div className="px-4 py-5 bg-white border-b border-gray-100">
+        <div className="flex gap-6 overflow-x-auto scrollbar-hide">
+          <div className="text-center min-w-[80px]">
+            <p className="text-3xl font-bold text-gray-900">{products.length}</p>
+            <p className="text-xs text-gray-500 mt-1">Total</p>
+          </div>
+          <div className="text-center min-w-[80px]">
+            <p className="text-3xl font-bold text-emerald-600">{activeCount}</p>
+            <p className="text-xs text-gray-500 mt-1">Active</p>
+          </div>
+          <div className="text-center min-w-[80px]">
+            <p className="text-3xl font-bold text-orange-600">{lowStockCount}</p>
+            <p className="text-xs text-gray-500 mt-1">Low Stock</p>
+          </div>
+          <div className="text-center min-w-[80px]">
+            <p className="text-3xl font-bold text-red-600">{outOfStockCount}</p>
+            <p className="text-xs text-gray-500 mt-1">Out of Stock</p>
+          </div>
+        </div>
+      </div>
 
-                    {['Food', 'Drink', 'Desserts',].map(cat => (
-                      <button
-                        key={cat}
-                        onClick={() => setFilterCategory(cat)}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition ${filterCategory === cat ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600'}`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
+      {/* PRODUCT LIST — SHOPIFY MOBILE PERFECTION */}
+      <div className="px-4 py-2">
+        {loading ? (
+          <div className="py-20 text-center">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-black rounded-full animate-spin mx-auto" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-20">
+            <Package size={64} className="mx-auto text-gray-300 mb-4" />
+            <p className="text-gray-500 text-lg">No products found</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((product) => (
+              <div key={product._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-4 p-4">
+                  {/* Image */}
+                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                    {product.image ? (
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package size={36} className="text-gray-400" />
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                      <Download size={18} />
-                      <span className="text-sm font-medium">Export</span>
-                    </button>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>
+                    <p className="text-sm text-gray-500">{product.category}</p>
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="text-xl font-bold text-gray-900">{product.price} SAR</span>
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                        product.status === 'active' 
+                          ? 'bg-emerald-100 text-emerald-700' 
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {product.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-sm">
+                      {product.stock === 0 ? (
+                        <span className="text-red-600 font-medium flex items-center gap-1">
+                          <X size={14} /> Out of stock
+                        </span>
+                      ) : product.stock < 10 ? (
+                        <span className="text-orange-600 font-medium flex items-center gap-1">
+                          <AlertCircle size={14} /> Only {product.stock} left
+                        </span>
+                      ) : (
+                        <span className="text-emerald-600 flex items-center gap-1">
+                          <CheckCircle2 size={14} /> In stock
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
+                  {/* ACTIONS — EDIT + DELETE */}
+                  <div className="flex flex-col gap-2">
                     <button
                       onClick={() => {
-                        setSelectedProduct(null);
+                        setSelectedProduct(product);
                         setShowModal(true);
                       }}
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:shadow-lg transition"
+                      className="p-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition"
                     >
-                      <Plus size={18} />
-                      <span className="text-sm font-medium">Add Product</span>
+                      <Edit3 size={18} className="text-gray-700" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product)}
+                      className="p-3 bg-red-50 hover:bg-red-100 rounded-xl transition"
+                    >
+                      <Trash2 size={18} className="text-red-600" />
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Products Grid */}
-            {loading ? (
-              <div className="flex justify-center items-center h-64">
-                <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product._id}
-                    product={product}
-                    onEdit={(p) => {
-                      setSelectedProduct(p);
-                      setShowModal(true);
-                    }}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* EMPTY STATE */}
-            {filteredProducts.length === 0 && !loading && (
-              <div className="text-center py-16 text-gray-500 text-lg">
-                No products found. Click &quot;Add Product&quot; to get started!
-              </div>
-            )}
+            ))}
           </div>
-        </main>
+        )}
       </div>
 
-      {/* Modal */}
+      {/* MODAL */}
       {showModal && (
         <ProductModal
           product={selectedProduct}
@@ -205,8 +205,9 @@ export default function ProductsPage() {
             setShowModal(false);
             setSelectedProduct(null);
           }}
-          onSave={handleSaveProduct}
-          saving={saving}
+          onSave={async () => {
+            await fetchProducts();
+          }}
         />
       )}
     </div>
