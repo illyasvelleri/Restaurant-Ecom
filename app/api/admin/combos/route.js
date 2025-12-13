@@ -1,41 +1,30 @@
-// app/api/admin/combos/route.js → 100% Working (Vercel + Turbopack Safe)
+// app/api/admin/combos/route.js → FINAL 2025 (NO MORE DUPLICATE ERRORS)
 
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import ComboOffer from "@/models/ComboOffer";
 import { uploadImage } from "@/lib/services/cloudinary";
 
-// Critical: Prevent Next.js from trying to statically render this API route
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
 
 const MAX_COMBOS = 10;
 
-// GET: Fetch all combos
+// GET
 export async function GET() {
   try {
     await connectDB();
-
-    const combos = await ComboOffer.find({})
-      .sort({ order: 1 })
-      .lean();
-
-    return NextResponse.json(combos, { status: 200 });
+    const combos = await ComboOffer.find({}).sort({ order: 1 }).lean();
+    return NextResponse.json(combos);
   } catch (error) {
     console.error("GET combos error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch combos" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
   }
 }
 
-// POST: Create new combo
+// POST — FIXED: Safe order assignment
 export async function POST(request) {
   try {
     await connectDB();
-
     const formData = await request.formData();
 
     const title = formData.get("title")?.toString();
@@ -44,7 +33,7 @@ export async function POST(request) {
 
     if (!title || !price || productIds.length === 0) {
       return NextResponse.json(
-        { error: "Title, price, and products are required" },
+        { error: "Title, price, and products required" },
         { status: 400 }
       );
     }
@@ -52,25 +41,19 @@ export async function POST(request) {
     const count = await ComboOffer.countDocuments();
     if (count >= MAX_COMBOS) {
       return NextResponse.json(
-        { error: "Maximum 10 combo offers allowed" },
+        { error: "Max 10 combos allowed" },
         { status: 400 }
       );
     }
 
+    // SAFELY GET NEXT ORDER NUMBER
+    const lastCombo = await ComboOffer.findOne().sort({ order: -1 });
+    const nextOrder = lastCombo ? lastCombo.order + 1 : 1;
+
     let imageUrl = null;
     const imageFile = formData.get("image");
-
-    // Only upload if file exists and has size
     if (imageFile && imageFile.size > 0) {
-      try {
-        imageUrl = await uploadImage(imageFile);
-      } catch (uploadError) {
-        console.error("Image upload failed:", uploadError);
-        return NextResponse.json(
-          { error: "Image upload failed" },
-          { status: 500 }
-        );
-      }
+      imageUrl = await uploadImage(imageFile);
     }
 
     const combo = await ComboOffer.create({
@@ -82,52 +65,46 @@ export async function POST(request) {
         : null,
       image: imageUrl,
       productIds,
-      order: count + 1,
+      order: nextOrder, // ← NOW SAFE — NEVER REPEATS
     });
 
     return NextResponse.json(
-      { message: "Combo created successfully!", combo },
+      { message: "Combo created!", combo },
       { status: 201 }
     );
   } catch (error) {
     console.error("POST combo error:", error);
     return NextResponse.json(
-      { error: "Server error. Please try again." },
+      { error: "Failed to create combo" },
       { status: 500 }
     );
   }
 }
 
-// DELETE: Remove combo by ID
+// DELETE — Reorder remaining combos
 export async function DELETE(request) {
   try {
     await connectDB();
-
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
-    if (!id) {
-      return NextResponse.json(
-        { error: "Combo ID is required" },
-        { status: 400 }
-      );
-    }
+    if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
     const deleted = await ComboOffer.findByIdAndDelete(id);
+    if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    if (!deleted) {
-      return NextResponse.json(
-        { error: "Combo not found" },
-        { status: 404 }
-      );
+    // REORDER REMAINING COMBOS
+    const remaining = await ComboOffer.find({}).sort({ order: 1 });
+    for (let i = 0; i < remaining.length; i++) {
+      if (remaining[i].order !== i + 1) {
+        remaining[i].order = i + 1;
+        await remaining[i].save();
+      }
     }
 
-    return NextResponse.json({ message: "Combo deleted successfully" });
+    return NextResponse.json({ message: "Deleted & reordered" });
   } catch (error) {
-    console.error("DELETE combo error:", error);
-    return NextResponse.json(
-      { error: "Failed to delete combo" },
-      { status: 500 }
-    );
+    console.error("DELETE error:", error);
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
   }
 }
