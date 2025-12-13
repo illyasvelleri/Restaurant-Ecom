@@ -3,7 +3,11 @@ import mongoose from 'mongoose';
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   category: { type: String, required: true },
-  price: { type: String, required: true }, // or Number if you prefer: type: Number
+  price: {
+    type: Number,    
+    required: true,
+    min: 0
+  },
   stock: { type: Number, required: true, min: 0 },
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   description: { type: String },
