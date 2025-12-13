@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Indulge - Best Food in Saudi",
+  title: "Restaurant - Best Food",
   description: "Order delicious food fast with love",
 };
 

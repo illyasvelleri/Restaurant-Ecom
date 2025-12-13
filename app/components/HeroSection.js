@@ -13,7 +13,7 @@ export default function HeroSection() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch("/api/admin/settings");
+        const res = await fetch("/api/restaurantDetails");
         if (res.ok) {
           const data = await res.json();
           const wa = data.restaurant?.whatsapp?.replace(/\D/g, "") || "";

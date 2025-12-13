@@ -27,7 +27,7 @@ export default function MenuPage() {
       try {
         const [prodRes, settingsRes] = await Promise.all([
           fetch('/api/user/products'),
-          fetch('/api/admin/settings')
+          fetch('/api/restaurantDetails')
         ]);
 
         if (prodRes.ok) {

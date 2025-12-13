@@ -34,7 +34,7 @@ export default function Footer() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch("/api/admin/settings");
+        const res = await fetch("/api/restaurantDetails");
         if (res.ok) {
           const data = await res.json();
           const r = data.restaurant || {};

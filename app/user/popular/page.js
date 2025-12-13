@@ -23,7 +23,7 @@ export default function PopularPage() {
       try {
         const [popularRes, settingsRes] = await Promise.all([
           fetch("/api/user/popular"),
-          fetch("/api/admin/settings")
+          fetch("/api/restaurantDetails")
         ]);
 
         if (popularRes.ok) {

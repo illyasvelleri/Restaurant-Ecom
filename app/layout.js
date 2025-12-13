@@ -36,7 +36,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "My restaurant - Best Food in Dubai",
+  title: "My restaurant - Best Food",
   description: "Order delicious food fast with love",
 };
 
