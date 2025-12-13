@@ -1,4 +1,4 @@
-// models/Setting.js
+// models/Setting.js → FINAL 2025 (FULLY WORKING WITH CURRENCY)
 
 import mongoose from 'mongoose';
 
@@ -14,11 +14,15 @@ const settingSchema = new mongoose.Schema({
     description: { type: String, default: '' },
     email: { type: String, default: '' },
     phone: { type: String, default: '' },
-    whatsapp: { type: String, default: '' },        // ← WhatsApp Number
+    whatsapp: { type: String, default: '' },
     address: { type: String, default: '' },
     website: { type: String, default: '' },
     timezone: { type: String, default: 'Asia/Riyadh' },
-    currency: { type: String, default: 'SAR' }      // ← Saudi Riyal
+    currency: {
+      type: String,
+      enum: ['SAR', 'AED', 'USD', 'EUR', 'INR'],
+      default: 'SAR'
+    }
   },
   notifications: {
     type: Map,
@@ -45,5 +49,5 @@ const settingSchema = new mongoose.Schema({
   collection: 'settings'
 });
 
-// Prevent model overwrite
+// Prevent model overwrite in development
 export default mongoose.models.Setting || mongoose.model('Setting', settingSchema);
