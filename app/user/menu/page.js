@@ -1,4 +1,4 @@
-// app/user/menu/page.js → FINAL PIXEL-PERFECT 2025 LUXURY MENU
+// app/user/menu/page.js → FINAL 2025 (CART BUTTON ROUTES TO /user/cart)
 
 "use client";
 
@@ -46,6 +46,16 @@ export default function MenuPage() {
       }
     };
     load();
+
+    // Load cart from localStorage
+    const savedCart = localStorage.getItem("cart");
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (e) {
+        setCart([]);
+      }
+    }
   }, []);
 
   const normalizeCategory = (cat) => {
@@ -78,9 +88,7 @@ export default function MenuPage() {
         newCart = [...prev, { ...item, quantity: 1 }];
       }
 
-      // THIS LINE SAVES CART TO LOCAL STORAGE (so checkout page can read it)
       localStorage.setItem("cart", JSON.stringify(newCart));
-
       return newCart;
     });
 
@@ -97,26 +105,13 @@ export default function MenuPage() {
         )
         .filter(i => i.quantity > 0);
 
-      // SAVE UPDATED CART TO STORAGE
       localStorage.setItem("cart", JSON.stringify(updated));
-
       return updated;
     });
   };
 
-
   const total = cart.reduce((s, i) => s + parseFloat(i.price || 0) * i.quantity, 0).toFixed(0);
   const cartCount = cart.reduce((a, b) => a + b.quantity, 0);
-
-  const sendWhatsApp = () => {
-    if (cart.length === 0) return toast.error("Cart is empty");
-    const items = cart.map(i => `${i.quantity}× ${i.name}`).join("%0A");
-    const msg = encodeURIComponent(`*New Order*\n\n${items}\n\n*Total: ${total} SAR*`);
-    window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, "_blank");
-    toast.success("Order sent");
-    setCart([]);
-    setShowCart(false);
-  };
 
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
@@ -128,20 +123,14 @@ export default function MenuPage() {
     <>
       <div className="min-h-screen bg-white">
 
-        {/* ABSOLUTELY PERFECT HEADER */}
-        {/* PERFECT SINGLE-LINE HEADER — 2025 LUXURY EDITION */}
+        {/* HEADER */}
         <div className="border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-            {/* Title + Search — ONE PERFECT ROW ON PC */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-16 py-16 lg:py-24">
-
-              {/* Left: Title — Single Line, Elegant */}
               <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light text-gray-900 tracking-tight text-center lg:text-left leading-none">
                 Explore Our Menu
               </h1>
 
-              {/* Right: Search Bar — Perfectly Aligned */}
               <div className="relative w-full max-w-xl lg:max-w-2xl xl:max-w-3xl">
                 <Search className="absolute left-8 top-1/2 -translate-y-1/2 text-gray-400" size={32} />
                 <input
@@ -159,30 +148,28 @@ export default function MenuPage() {
               </div>
             </div>
 
-            {/* Category Pills — Elegant & Centered */}
             <div className="flex flex-wrap justify-center gap-6 lg:gap-8 pb-16 lg:pb-20">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
                   className={`
-            px-10 lg:px-14 py-5 rounded-full text-lg lg:text-xl font-medium 
-            transition-all duration-500 border-2 shadow-md hover:shadow-xl
-            ${selectedCategory === cat
+                    px-10 lg:px-14 py-5 rounded-full text-lg lg:text-xl font-medium 
+                    transition-all duration-500 border-2 shadow-md hover:shadow-xl
+                    ${selectedCategory === cat
                       ? "bg-gray-900 text-white border-gray-900"
                       : "bg-white text-gray-700 border-gray-200 hover:border-gray-900 hover:text-gray-900"
                     }
-          `}
+                  `}
                 >
                   {cat}
                 </button>
               ))}
             </div>
-
           </div>
         </div>
 
-        {/* PERFECT GRID — NO MORE BORING SPACING */}
+        {/* GRID */}
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-28">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-10 lg:gap-14 xl:gap-16">
             {filteredItems.map((item, index) => (
@@ -194,7 +181,7 @@ export default function MenuPage() {
                 whileHover={{ y: -8 }}
                 className="h-full"
               >
-                <PixelPerfectCard key={item._id} dish={item} onAdd={addToCart} />
+                <PixelPerfectCard dish={item} onAdd={addToCart} />
               </motion.div>
             ))}
           </div>
@@ -206,10 +193,10 @@ export default function MenuPage() {
           )}
         </div>
 
-        {/* Floating Cart */}
+        {/* Floating Cart Button — NOW ROUTES TO /user/cart */}
         {cartCount > 0 && (
           <button
-            onClick={() => setShowCart(true)}
+            onClick={() => router.push('/user/cart')} // ← GOES TO DEDICATED CART PAGE
             className="fixed bottom-28 right-8 z-50 bg-gray-900 text-white w-20 h-20 rounded-full shadow-2xl hover:shadow-amber-600/40 hover:scale-110 transition-all duration-500 flex items-center justify-center"
           >
             <ShoppingCart size={38} />
@@ -219,97 +206,20 @@ export default function MenuPage() {
           </button>
         )}
 
-        {/* FINAL RESPONSIVE LUXURY CART — PERFECT ON ALL DEVICES */}
-        {showCart && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-xl z-50 flex items-end lg:items-center justify-center p-4">
-            <motion.div
-              initial={{ y: 100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 100, opacity: 0 }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="bg-white w-full max-w-2xl mx-auto rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[90vh] lg:h-auto lg:max-h-[90vh]"
-            >
-              {/* Header */}
-              <div className="p-6 lg:p-8 border-b border-gray-100 flex justify-between items-center flex-shrink-0 bg-white">
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Your Order ({cartCount})</h2>
-                <button onClick={() => setShowCart(false)} className="p-3 hover:bg-gray-100 rounded-full transition">
-                  <X size={36} />
-                </button>
-              </div>
+        {/* REMOVED OLD CART BOTTOM SHEET — NOW WE HAVE FULL CART PAGE */}
+      </div>
 
-              {/* Scrollable Items */}
-              <div className="flex-1 overflow-y-auto px-6 lg:px-8 py-6 space-y-6">
-                {cart.map((item, idx) => (
-                  <motion.div
-                    key={item._id}
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="flex gap-6 bg-gray-50/80 p-6 rounded-3xl shadow-md"
-                  >
-                    <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl overflow-hidden flex-shrink-0 shadow-md">
-                      <Image
-                        src={item.image || "/placeholder.jpg"}
-                        alt={item.name}
-                        width={112}
-                        height={112}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div>
-                        <h4 className="text-lg lg:text-xl font-bold text-gray-900 leading-tight">{item.name}</h4>
-                        <p className="text-gray-600 text-sm lg:text-base mt-1">{item.price} SAR each</p>
-                      </div>
-                      <div className="flex items-center gap-5 mt-4">
-                        <button onClick={() => updateQty(item._id, -1)} className="w-12 h-12 rounded-full border-2 border-gray-300 hover:border-gray-900 transition">
-                          <Minus size={20} />
-                        </button>
-                        <span className="text-2xl lg:text-3xl font-bold w-16 text-center">{item.quantity}</span>
-                        <button onClick={() => updateQty(item._id, 1)} className="w-12 h-12 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition">
-                          <Plus size={20} />
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Total + Checkout */}
-              <div className="p-6 lg:p-8 border-t border-gray-100 bg-gradient-to-t from-gray-50 to-white flex-shrink-0">
-                <div className="flex justify-between text-3xl lg:text-4xl font-bold mb-8 text-gray-900">
-                  <span>Total</span>
-                  <span>{total} SAR</span>
-                </div>
-
-                <button
-                  onClick={() => {
-                    if (cart.length === 0) return toast.error("Cart is empty");
-                    router.push("/user/checkout"); // New page!
-                  }}
-                  className="w-full py-7 bg-gray-900 text-white rounded-3xl font-bold text-xl lg:text-2xl hover:bg-gray-800 transition shadow-2xl"
-                >
-                  Proceed to Delivery
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-
-        <Footer />
-      </div >
+      <Footer />
     </>
   );
 }
 
-// PIXEL-PERFECT 2025 LUXURY CARD
+// PIXEL-PERFECT CARD — UNCHANGED
 function PixelPerfectCard({ dish, onAdd }) {
   return (
     <div className="group relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-700">
-      {/* Gold shimmer */}
       <div className="absolute -inset-1 bg-gradient-to-br from-amber-200/25 via-orange-100/15 to-transparent rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition duration-1000 -z-10" />
 
-      {/* 4:3 Image with overlay */}
       <div className="relative aspect-[4/3] overflow-hidden">
         {dish.image ? (
           <Image
@@ -324,12 +234,9 @@ function PixelPerfectCard({ dish, onAdd }) {
           <div className="h-full bg-gradient-to-br from-gray-100 to-gray-200" />
         )}
 
-        {/* Perfect overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
 
-        {/* Content over image */}
         <div className="absolute inset-0 p-6 lg:p-8 flex flex-col justify-between text-white">
-          {/* Top: Name + Description */}
           <div className="mb-3">
             <h3 className="text-2xl lg:text-3xl font-bold leading-tight drop-shadow-2xl max-w-[70%]">
               {dish.name}
@@ -339,7 +246,6 @@ function PixelPerfectCard({ dish, onAdd }) {
             </p>
           </div>
 
-          {/* Bottom: Price + Button */}
           <div className="flex items-end justify-between">
             <div>
               <div className="text-3xl lg:text-4xl font-bold drop-shadow-2xl">

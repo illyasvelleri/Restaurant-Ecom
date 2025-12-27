@@ -4,7 +4,7 @@ const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   category: { type: String, required: true },
   price: {
-    type: Number,    
+    type: Number,
     required: true,
     min: 0
   },
@@ -12,8 +12,15 @@ const productSchema = new mongoose.Schema({
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   description: { type: String },
   image: { type: String, default: null }, // Cloudinary URL
+  addons: [{
+    name: { type: String, required: true },
+    price: { type: Number, required: true, min: 0 }
+  }],
   rating: { type: String, default: '0.0' },
   sales: { type: Number, default: 0 },
-}, { timestamps: true });
+}, {
+  timestamps: true,
+  strict: false  // ← THIS IS THE KEY FIX
+});
 
 export default mongoose.models.Product || mongoose.model('Product', productSchema);
