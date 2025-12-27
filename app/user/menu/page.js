@@ -121,7 +121,7 @@ export default function MenuPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white py-28">
 
         {/* HEADER */}
         <div className="border-b border-gray-100">

@@ -104,7 +104,7 @@ export default function ProfilePage() {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-slate-100 to-white py-10">
+    <div className="min-h-screen bg-gradient-to-br from-white via-slate-100 to-white py-28">
       <div className="max-w-4xl mx-auto px-6 pt-16">
 
         {/* Container */}

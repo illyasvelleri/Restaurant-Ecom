@@ -96,7 +96,7 @@ export default function CombosPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white py-28">
 
         {/* LUXURY HEADER */}
         <div className="border-b border-gray-100">

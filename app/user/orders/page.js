@@ -39,7 +39,7 @@ export default function OrdersPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-xl">Loading your orders...</p></div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50 py-28">
       <div className="container mx-auto px-6 max-w-5xl">
         <h1 className="text-4xl font-extrabold text-center mb-4">My Orders</h1>
         <p className="text-center text-gray-600 mb-12">Track your recent WhatsApp orders</p>
