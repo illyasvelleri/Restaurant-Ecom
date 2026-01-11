@@ -1,4 +1,4 @@
-// app/admin/popular/page.js → FINAL 2025 MOBILE-FRIENDLY (SHOPIFY + TALABAT STYLE)
+// app/admin/popular/page.js → FINAL 2025 (100% CRASH-PROOF)
 
 "use client";
 
@@ -43,7 +43,7 @@ export default function PopularProductsPage() {
 
   const addToPopular = async (product) => {
     if (popularItems.length >= MAX_POPULAR) {
-      toast.error(`Maximum ${MAX_POPULAR} popular items allowed!`, { icon: "AlertCircle" });
+      toast.error(`Maximum ${MAX_POPULAR} popular items allowed!`);
       return;
     }
 
@@ -73,7 +73,7 @@ export default function PopularProductsPage() {
   };
 
   const filteredProducts = allProducts
-    .filter(p => !popularItems.some(pi => pi.product._id === p._id))
+    .filter(p => !popularItems.some(pi => pi.product?._id === p._id))
     .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
@@ -92,7 +92,6 @@ export default function PopularProductsPage() {
             </div>
           </div>
 
-          {/* SEARCH */}
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
@@ -106,7 +105,7 @@ export default function PopularProductsPage() {
         </div>
       </div>
 
-      {/* CURRENT POPULAR ITEMS */}
+      {/* CURRENT POPULAR ITEMS — FULLY SAFE */}
       <div className="px-4 py-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-gray-900">Currently Popular</h2>
@@ -123,15 +122,17 @@ export default function PopularProductsPage() {
             {popularItems.map(({ _id, product }) => (
               <div key={_id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="relative h-32 bg-gradient-to-br from-orange-50 to-orange-100">
-                  {product.image ? (
+                  {product?.image ? (
                     <Image
                       src={product.image}
-                      alt={product.name}
+                      alt={product.name || "Product"}
                       fill
                       className="object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-200 border-2 border-dashed border-gray-300" />
+                    <div className="w-full h-full bg-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                      <p className="text-gray-500 text-sm">No Image</p>
+                    </div>
                   )}
                   <div className="absolute top-2 right-2">
                     <button
@@ -143,8 +144,12 @@ export default function PopularProductsPage() {
                   </div>
                 </div>
                 <div className="p-3">
-                  <p className="font-semibold text-gray-900 truncate">{product.name}</p>
-                  <p className="text-lg font-bold text-gray-900 mt-1">{product.price} SAR</p>
+                  <p className="font-semibold text-gray-900 truncate">
+                    {product?.name || "Deleted Product"}
+                  </p>
+                  <p className="text-lg font-bold text-gray-900 mt-1">
+                    {product?.price ? `${product.price} SAR` : "N/A"}
+                  </p>
                 </div>
               </div>
             ))}
@@ -184,7 +189,9 @@ export default function PopularProductsPage() {
                       className="object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-200 border-2 border-dashed border-gray-300" />
+                    <div className="w-full h-full bg-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                      <p className="text-gray-500 text-sm">No Image</p>
+                    </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition flex items-end justify-center pb-4">
                     <div className="px-4 py-2 bg-white text-black rounded-full font-bold text-sm flex items-center gap-2">

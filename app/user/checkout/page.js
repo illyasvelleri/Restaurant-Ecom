@@ -1,4 +1,4 @@
-// app/user/checkout/page.js → FINAL 2025 (ADDONS + ORDER ID/TIME SAVED)
+// app/user/checkout/page.js → FINAL 2025 (FULL + QUICK MODE + ADDONS + ORDER ID/TIME)
 
 "use client";
 
@@ -19,6 +19,7 @@ export default function CheckoutPage() {
 
     const [cart, setCart] = useState([]);
     const [whatsappNumber, setWhatsappNumber] = useState("");
+    const [mode, setMode] = useState("full"); // "full" or "quick"
 
     const calculateTotal = () => {
         return cart.reduce((sum, item) => {
@@ -58,7 +59,7 @@ export default function CheckoutPage() {
                     const wa = data.restaurant?.whatsapp?.replace(/\D/g, "") || "";
                     if (wa && wa.length >= 10) setWhatsappNumber(wa);
                 }
-            } catch (err) { }
+            } catch (err) {}
         };
         loadDetails();
 
@@ -88,8 +89,13 @@ export default function CheckoutPage() {
     const updateField = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
     const sendOrder = async () => {
-        if (!form.whatsapp || !form.name || !form.address) {
-            toast.error("Name, WhatsApp & address required");
+        if (!form.whatsapp || !form.name || !form.city) {
+            toast.error("Name, WhatsApp & City required");
+            return;
+        }
+
+        if (mode === "full" && !form.address) {
+            toast.error("Full address required in detailed mode");
             return;
         }
 
@@ -100,9 +106,7 @@ export default function CheckoutPage() {
 
         setSaving(true);
 
-        // Generate Order ID and Time (IST)
         const orderId = "ORD-" + Math.floor(Math.random() * 1000000).toString().padStart(6, "0");
-
         const orderTime = new Date().toLocaleString("en-GB", {
             timeZone: "Asia/Riyadh",
             day: "2-digit",
@@ -113,75 +117,67 @@ export default function CheckoutPage() {
             hour12: true
         });
 
-
         let message = "";
 
-        // Header
-        message += "*NEW ORDER RECEIVED*\n\n";
-        message += `*Order ID:* ${orderId}\n`;
-        message += `*Time:* ${orderTime}\n`;
-        message += `*Customer:* _${form.name}_\n`;
-        message += "--------------------------------\n";
-
-        // Order details
-        message += "*ORDER DETAILS*\n";
-        message += "--------------------------------\n";
+        message += "```";
+        message += "NEW ORDER RECEIVED\n";
+        message += "----------------------------\n";
+        message += `Order ID : ${orderId}\n`;
+        message += `Time     : ${orderTime}\n`;
+        message += `Customer : ${form.name}\n`;
+        message += "----------------------------\n";
+        message += "ITEMS\n";
+        message += "----------------------------\n";
 
         cart.forEach(item => {
             const qty = item.quantity;
             const unitPrice = parseFloat(item.price);
             const baseTotal = unitPrice * qty;
 
-            message += `*${qty} × ${item.name}*\n`;
-            message += `_Price:_ ${unitPrice.toFixed(2)} SAR × ${qty}\n`;
+            message += `${qty} x ${item.name}\n`;
+            message += `  ${unitPrice.toFixed(2)} SAR x ${qty} = ${baseTotal.toFixed(2)}\n`;
 
             let addonsTotal = 0;
 
             if (item.selectedAddons && item.selectedAddons.length > 0) {
-                message += "*Add-ons:*\n";
                 item.selectedAddons.forEach(addon => {
                     const addonPrice = parseFloat(addon.price);
                     addonsTotal += addonPrice;
-                    message += `- _${addon.name}_ (+${addonPrice.toFixed(2)} SAR)\n`;
+                    message += `  + ${addon.name} ${addonPrice.toFixed(2)}\n`;
                 });
                 addonsTotal *= qty;
-                message += `*_Add-ons Total:_* +${addonsTotal.toFixed(2)} SAR\n`;
+                message += `  Add-ons Total = ${addonsTotal.toFixed(2)}\n`;
             }
 
-            const itemTotal = baseTotal + addonsTotal;
-            message += `*Item Total:* ${itemTotal.toFixed(2)} SAR\n\n`;
+            message += `  ITEM TOTAL = ${(baseTotal + addonsTotal).toFixed(2)} SAR\n`;
+            message += "\n";
         });
 
-        // Grand total
-        message += "--------------------------------\n";
-        message += `*GRAND TOTAL:* ${total} SAR\n`;
-        message += "--------------------------------\n\n";
+        message += "----------------------------\n";
+        message += `GRAND TOTAL = ${total} SAR\n`;
+        message += "----------------------------\n\n";
 
-        // Address
-        message += "*DELIVERY ADDRESS*\n";
-        message += `_${form.address}_\n`;
+        message += "DELIVERY ADDRESS\n";
+        message += "----------------------------\n";
+        message += `${form.address || "Quick order - city only"}\n`;
+        if (form.building) message += `Building : ${form.building}\n`;
+        if (form.floor) message += `Floor    : ${form.floor}\n`;
+        if (form.apartment) message += `Apartment: ${form.apartment}\n`;
+        if (form.neighborhood) message += `Area     : ${form.neighborhood}\n`;
+        message += `${form.city}\n\n`;
 
-        if (form.building) message += `_Building:_ ${form.building}\n`;
-        if (form.floor) message += `_Floor:_ ${form.floor}\n`;
-        if (form.apartment) message += `_Apartment:_ ${form.apartment}\n`;
-        if (form.neighborhood) message += `_Area:_ ${form.neighborhood}\n`;
+        message += `CONTACT : ${form.whatsapp}\n`;
 
-        message += `_${form.city}_\n\n`;
-
-        // Contact
-        message += `*Contact:* _${form.whatsapp}_\n`;
-
-        // Notes
         if (form.notes.trim()) {
-            message += "\n*Notes:*\n";
-            message += `_${form.notes}_\n`;
+            message += "\nNOTES\n";
+            message += "----------------------------\n";
+            message += `${form.notes}\n`;
         }
 
-        // Encode ONCE, correctly
+        message += "```";
+
         const encodedMessage = encodeURIComponent(message);
 
-
-        // Save order with Order ID and Time
         try {
             await fetch("/api/user/saveOrders", {
                 method: "POST",
@@ -200,10 +196,10 @@ export default function CheckoutPage() {
                         }))
                     })),
                     totalAmount: parseFloat(total),
-                    address: `${form.address}, ${form.city}`,
+                    address: `${form.address || "Quick order"}, ${form.city}`,
                     notes: form.notes,
-                    orderId: orderId,           // ← NEW
-                    orderTime: orderTime        // ← NEW
+                    orderId,
+                    orderTime
                 }),
             });
         } catch (e) {
@@ -221,6 +217,7 @@ export default function CheckoutPage() {
     return (
         <div className="min-h-screen bg-white py-12 px-6">
             <div className="max-w-4xl mx-auto">
+
                 <button
                     onClick={() => router.back()}
                     className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 text-lg"
@@ -229,9 +226,34 @@ export default function CheckoutPage() {
                 </button>
 
                 <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 lg:p-12">
+
                     <div className="text-center mb-10">
                         <h1 className="text-4xl lg:text-5xl font-light text-gray-900">Complete Your Order</h1>
                         <p className="text-xl text-gray-600 mt-4">We deliver anywhere in Saudi Arabia & GCC</p>
+                    </div>
+
+                    {/* MODE SWITCHER */}
+                    <div className="flex justify-center gap-4 mb-10">
+                        <button
+                            onClick={() => setMode("full")}
+                            className={`px-8 py-4 rounded-full font-medium transition-all ${
+                                mode === "full"
+                                    ? "bg-black text-white shadow-xl"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                        >
+                            Full Delivery Details
+                        </button>
+                        <button
+                            onClick={() => setMode("quick")}
+                            className={`px-8 py-4 rounded-full font-medium transition-all ${
+                                mode === "quick"
+                                    ? "bg-black text-white shadow-xl"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                        >
+                            Quick Order
+                        </button>
                     </div>
 
                     {/* Cart Summary with Addons */}
@@ -276,22 +298,40 @@ export default function CheckoutPage() {
                                 );
                             })}
                         </div>
+
                         <div className="text-3xl font-bold mt-8 text-right text-orange-600">
                             Grand Total: {total} SAR
                         </div>
                     </div>
 
-                    {/* Delivery Form */}
-                    <div className="grid md:grid-cols-2 gap-8">
-                        <Field icon={<User />} label="Full Name *" value={form.name} onChange={e => updateField("name", e.target.value)} />
-                        <Field icon={<MessageCircle />} label="WhatsApp Number *" value={form.whatsapp} onChange={e => updateField("whatsapp", e.target.value.replace(/\D/g, ""))} placeholder="966501234567" />
-                        <Field icon={<MapPin />} label="City *" value={form.city} onChange={e => updateField("city", e.target.value)} />
-                        <Field icon={<Home />} label="Neighborhood / Area *" value={form.neighborhood} onChange={e => updateField("neighborhood", e.target.value)} className="md:col-span-2" />
-                        <FieldTextarea icon={<MapPin />} label="Street Address *" value={form.address} onChange={e => updateField("address", e.target.value)} className="md:col-span-2" />
-                        <Field icon={<Building2 />} label="Building / Villa" value={form.building} onChange={e => updateField("building", e.target.value)} />
-                        <Field label="Floor" value={form.floor} onChange={e => updateField("floor", e.target.value)} />
-                        <Field label="Apartment No." value={form.apartment} onChange={e => updateField("apartment", e.target.value)} />
-                        <FieldTextarea label="Extra Notes (Gate code, etc.)" value={form.notes} onChange={e => updateField("notes", e.target.value)} className="md:col-span-2" />
+                    {/* FORM — SWITCHES BASED ON MODE */}
+                    <div className="space-y-8">
+                        {/* Always required fields */}
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <Field icon={<User />} label="Full Name *" value={form.name} onChange={e => updateField("name", e.target.value)} />
+                            <Field icon={<MessageCircle />} label="WhatsApp Number *" value={form.whatsapp} onChange={e => updateField("whatsapp", e.target.value.replace(/\D/g, ""))} placeholder="966501234567" />
+                            <Field icon={<MapPin />} label="City *" value={form.city} onChange={e => updateField("city", e.target.value)} />
+                        </div>
+
+                        {/* Full mode — detailed address */}
+                        {mode === "full" && (
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <FieldTextarea icon={<MapPin />} label="Street Address *" value={form.address} onChange={e => updateField("address", e.target.value)} />
+                                <Field icon={<Building2 />} label="Building / Villa" value={form.building} onChange={e => updateField("building", e.target.value)} />
+                                <Field label="Floor" value={form.floor} onChange={e => updateField("floor", e.target.value)} />
+                                <Field label="Apartment No." value={form.apartment} onChange={e => updateField("apartment", e.target.value)} />
+                                <Field icon={<Home />} label="Neighborhood / Area" value={form.neighborhood} onChange={e => updateField("neighborhood", e.target.value)} className="md:col-span-2" />
+                                <FieldTextarea label="Extra Notes (Gate code, etc.)" value={form.notes} onChange={e => updateField("notes", e.target.value)} className="md:col-span-2" />
+                            </div>
+                        )}
+
+                        {/* Quick mode — only minimal info */}
+                        {mode === "quick" && (
+                            <div className="text-center text-gray-600 py-6">
+                                <p className="text-lg">Quick order mode: We will contact you via WhatsApp for exact delivery details.</p>
+                                <p className="text-sm mt-2">Only name, WhatsApp, and city required.</p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Submit */}
@@ -318,7 +358,7 @@ export default function CheckoutPage() {
     );
 }
 
-// Reusable fields
+// Reusable fields (unchanged)
 function Field({ icon, label, className, ...props }) {
     return (
         <div className={className}>
