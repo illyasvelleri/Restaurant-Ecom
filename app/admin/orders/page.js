@@ -215,7 +215,7 @@ export default function OrdersPage() {
                                             </span>
                                         </div>
                                         <div className="flex items-center justify-between mt-2">
-                                            <p className="text-xl font-bold text-gray-900">{order.total?.toFixed(2) || "0.00"} SAR</p>
+                                            <p className="text-xl font-bold text-gray-900">{order.total?.toFixed(2) || "0.00"}</p>
                                             <p className="text-xs text-gray-500">
                                                 {order.createdAt ? new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
                                             </p>

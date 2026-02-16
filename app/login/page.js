@@ -1,5 +1,4 @@
-// app/login/page.js → FINAL 2025 LUXURY LOGIN PAGE
-
+// app/login/page.js → READABLE PRO LUXURY
 "use client";
 
 import { useState } from "react";
@@ -7,186 +6,154 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { LogIn, Loader2, ChevronLeft, User, MessageCircle } from "lucide-react";
+import { Loader2, ChevronLeft, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
-  const [loginMode, setLoginMode] = useState("username"); // "username" or "whatsapp"
+  const [loginMode, setLoginMode] = useState("username");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     const formData = new FormData(e.target);
     const identifier = formData.get("identifier")?.trim();
     const password = formData.get("password");
 
-    if (!identifier || !password) {
-      toast.error("Please fill in all fields");
-      setLoading(false);
-      return;
-    }
-
-    const cleanValue = loginMode === "whatsapp" ? identifier.replace(/\D/g, "") : identifier;
-    const field = loginMode === "whatsapp" ? "whatsapp" : "username";
-
     const res = await signIn("credentials", {
-      [field]: cleanValue,
+      [loginMode === "whatsapp" ? "whatsapp" : "username"]: loginMode === "whatsapp" ? identifier.replace(/\D/g, "") : identifier,
       password,
       redirect: false,
-      callbackUrl: "/user/menu",
     });
 
     if (res?.error) {
-      toast.error("Invalid credentials");
+      toast.error("Access Denied");
       setLoading(false);
     } else {
-      if (rememberMe) {
-        document.cookie = "remember-me=true; path=/; max-age=31536000";
-      }
-      toast.success("Welcome back!", { style: { background: "#111", color: "#fff" } });
+      toast.success("Identity Verified");
       router.push("/user/menu");
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-6 py-12 lg:py-20 mb-32">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-white flex overflow-hidden">
+      
+      {/* LEFT SIDE: ATMOSPHERE (Visible only on PC) */}
+      <div className="hidden lg:flex lg:w-1/2 bg-black relative p-20 flex-col justify-between overflow-hidden">
+        <div className="absolute inset-0 opacity-40">
+           <div className="absolute top-[-10%] left-[-10%] w-[70%] h-[70%] bg-white/10 blur-[120px] rounded-full" />
+        </div>
 
-        {/* Back Button */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-3 text-gray-600 hover:text-gray-900 mb-12 text-lg font-medium transition"
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10">
+          <Link href="/" className="text-white text-sm font-bold tracking-widest uppercase opacity-70 hover:opacity-100 transition-opacity flex items-center gap-3">
+            <ChevronLeft size={18} /> Back to Home
+          </Link>
+        </motion.div>
+
+        <div className="relative z-10">
+          <h2 className="text-8xl font-light text-white tracking-tighter leading-tight">
+            Fine <br />
+            <span className="font-serif italic text-white/30">Dining.</span>
+          </h2>
+        </div>
+        <div className="relative z-10 text-xs font-bold text-white/20 tracking-[0.5em] uppercase">
+          SECURE ACCESS PORTAL
+        </div>
+      </div>
+
+      {/* RIGHT SIDE: INTERFACE (Mobile + PC) */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#fdfdfd]">
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-[420px]"
         >
-          <ChevronLeft size={24} />
-          Back to Home
-        </Link>
+          {/* Mobile Back Button */}
+          <Link href="/" className="lg:hidden flex items-center gap-2 text-sm font-bold tracking-wide text-gray-500 mb-10 uppercase">
+            <ChevronLeft size={16} /> Back
+          </Link>
 
-        {/* MAIN CARD */}
-        <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-10 lg:p-12">
-
-          {/* Header */}
-          <div className="text-center mb-10">
-            <div className="w-20 h-20 bg-gray-900 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-2xl">
-              <LogIn size={40} className="text-white" />
-            </div>
-            <h1 className="text-4xl lg:text-5xl font-light text-gray-900 tracking-tight">
-              Welcome Back
+          <header className="mb-12">
+            <h1 className="text-5xl font-light tracking-tight text-black mb-4">
+              Sign <span className="font-serif italic text-gray-400">In</span>
             </h1>
-            <p className="mt-4 text-lg text-gray-600 font-light">
-              Sign in to continue your journey
-            </p>
+            <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Identify yourself to proceed</p>
+          </header>
+
+          {/* TOGGLE - Clean & Visible */}
+          <div className="flex p-1.5 bg-gray-100 rounded-2xl mb-10 relative border border-gray-200/50">
+            {["username", "whatsapp"].map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setLoginMode(mode)}
+                className={`relative z-10 flex-1 py-3.5 rounded-xl text-xs font-bold tracking-widest uppercase transition-all duration-300 ${
+                  loginMode === mode ? "text-black" : "text-gray-500"
+                }`}
+              >
+                {mode}
+              </button>
+            ))}
+            <motion.div 
+              className="absolute top-1.5 bottom-1.5 left-1.5 bg-white rounded-xl shadow-md"
+              initial={false}
+              animate={{ width: "calc(50% - 6px)", x: loginMode === "username" ? "0%" : "100%" }}
+            />
           </div>
 
-          {/* Toggle: Username / WhatsApp */}
-          <div className="flex mb-8 rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-            <button
-              type="button"
-              onClick={() => setLoginMode("username")}
-              className={`flex-1 py-5 px-6 font-medium text-lg transition-all duration-300 flex items-center justify-center gap-3 ${
-                loginMode === "username"
-                  ? "bg-gray-900 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <User size={22} />
-              Username
-            </button>
-            <button
-              type="button"
-              onClick={() => setLoginMode("whatsapp")}
-              className={`flex-1 py-5 px-6 font-medium text-lg transition-all duration-300 flex items-center justify-center gap-3 ${
-                loginMode === "whatsapp"
-                  ? "bg-gray-900 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <MessageCircle size={22} />
-              WhatsApp
-            </button>
-          </div>
-
-          {/* FORM */}
-          <form onSubmit={handleSubmit} className="space-y-7">
-            <div>
-              <label className="block text-lg font-medium text-gray-800 mb-3">
-                {loginMode === "whatsapp" ? "WhatsApp Number" : "Username"}
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Input 1 */}
+            <div className="group space-y-3">
+              <label className="text-xs font-bold tracking-widest text-gray-500 uppercase ml-1 group-focus-within:text-black transition-colors">
+                {loginMode === "username" ? "Your Username" : "WhatsApp Number"}
               </label>
-              <div className="relative">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500">
-                  {loginMode === "whatsapp" ? <MessageCircle size={24} /> : <User size={24} />}
-                </div>
-                <input
-                  name="identifier"
-                  type={loginMode === "whatsapp" ? "tel" : "text"}
-                  required
-                  placeholder={loginMode === "whatsapp" ? "966501234567" : "Enter your username"}
-                  className="w-full pl-16 pr-6 py-5 bg-gray-50 border border-gray-200 rounded-2xl text-lg focus:outline-none focus:ring-4 focus:ring-amber-100/50 transition-all duration-300"
-                />
-              </div>
+              <input
+                name="identifier"
+                type={loginMode === "whatsapp" ? "tel" : "text"}
+                required
+                placeholder={loginMode === "whatsapp" ? "+966 ••• •••" : "e.g. alex_chef"}
+                className="w-full bg-white border border-gray-200 rounded-2xl py-5 px-6 text-[16px] text-black placeholder:text-gray-300 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
+              />
             </div>
 
-            <div>
-              <label className="block text-lg font-medium text-gray-800 mb-3">Password</label>
+            {/* Input 2 */}
+            <div className="group space-y-3">
+              <div className="flex justify-between items-center px-1">
+                <label className="text-xs font-bold tracking-widest text-gray-500 uppercase group-focus-within:text-black transition-colors">Password</label>
+                <Link href="/forgot-password" className="text-xs font-bold text-gray-400 hover:text-black transition-colors underline underline-offset-4">Forgot?</Link>
+              </div>
               <input
                 name="password"
                 type="password"
                 required
-                placeholder="Enter your password"
-                className="w-full px-6 py-5 bg-gray-50 border border-gray-200 rounded-2xl text-lg focus:outline-none focus:ring-4 focus:ring-amber-100/50 transition-all duration-300"
+                placeholder="••••••••"
+                className="w-full bg-white border border-gray-200 rounded-2xl py-5 px-6 text-[16px] text-black placeholder:text-gray-300 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-4 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-6 h-6 rounded border-gray-300 text-gray-900 focus:ring-amber-500"
-                />
-                <span className="text-base font-medium text-gray-700">Remember me</span>
-              </label>
-              <Link href="/forgot-password" className="text-base text-gray-900 hover:underline font-medium">
-                Forgot password?
-              </Link>
-            </div>
-
-            {/* SUBMIT BUTTON */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-6 bg-gray-900 text-white rounded-3xl font-bold text-xl hover:bg-gray-800 hover:shadow-amber-600/30 transition-all duration-500 shadow-2xl flex items-center justify-center gap-4 disabled:opacity-70"
+              className="w-full mt-6 bg-black text-white rounded-2xl py-5 text-sm font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-all shadow-xl active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
             >
               {loading ? (
-                <>
-                  <Loader2 className="animate-spin" size={28} />
-                  Signing in...
-                </>
+                <Loader2 className="animate-spin" size={20} />
               ) : (
-                <>
-                  <LogIn size={28} />
-                  Sign In
-                </>
+                <>Authorize <ArrowRight size={18} /></>
               )}
             </button>
           </form>
 
-          {/* REGISTER LINK */}
-          <div className="mt-10 text-center">
-            <p className="text-lg text-gray-600">
+          <footer className="mt-12 text-center">
+            <p className="text-sm font-medium text-gray-500">
               New here?{" "}
-              <Link
-                href="/register"
-                className="font-bold text-gray-900 hover:underline"
-              >
-                Create an account
+              <Link href="/register" className="text-black font-bold underline underline-offset-4 hover:text-gray-600 ml-1 transition-colors">
+                Create Account
               </Link>
             </p>
-          </div>
-        </div>
+          </footer>
+        </motion.div>
       </div>
     </div>
   );

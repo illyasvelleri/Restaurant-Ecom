@@ -1,4 +1,4 @@
-// app/user/orders/page.js
+// app/user/orders/page.js → UPDATED 2025 (DYNAMIC CURRENCY FROM PUBLIC API)
 
 "use client";
 
@@ -8,18 +8,29 @@ import toast from "react-hot-toast";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
+  const [currency, setCurrency] = useState("SAR"); // ← NEW: dynamic currency
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/user/orders');
-        if (res.ok) {
-          const data = await res.json();
+        const [ordersRes, settingsRes] = await Promise.all([
+          fetch('/api/user/orders'),
+          fetch('/api/restaurantDetails') // ← fetch currency from public endpoint
+        ]);
+
+        if (ordersRes.ok) {
+          const data = await ordersRes.json();
           setOrders(data);
         }
+
+        if (settingsRes.ok) {
+          const settings = await settingsRes.json();
+          const fetchedCurrency = settings.currency || "SAR";
+          setCurrency(fetchedCurrency);
+        }
       } catch (err) {
-        toast.error("Failed to load orders");
+        toast.error("Failed to load orders or settings");
       } finally {
         setLoading(false);
       }
@@ -68,13 +79,13 @@ export default function OrdersPage() {
                   {order.items.map((item, i) => (
                     <div key={i} className="flex justify-between text-gray-700">
                       <span>{item.quantity}x {item.name}</span>
-                      <span>{item.price} SAR</span>
+                      <span>{item.price} {currency}</span> {/* ← dynamic currency */}
                     </div>
                   ))}
                 </div>
 
                 <div className="border-t pt-4 flex justify-between items-center">
-                  <span className="font-bold text-xl">Total: {order.total} SAR</span>
+                  <span className="font-bold text-xl">Total: {order.total} {currency}</span> {/* ← dynamic currency */}
                   <a
                     href={`https://wa.me/${order.whatsapp}?text=${encodeURIComponent("Hi, regarding my order from " + new Date(order.createdAt).toLocaleDateString())}`}
                     target="_blank"

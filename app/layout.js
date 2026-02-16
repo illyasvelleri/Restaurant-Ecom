@@ -25,10 +25,10 @@
 //     </html>
 //   );
 // }
-
-//app/layout.js
+// app/layout.js
 import "./globals.css";
 import { Inter } from "next/font/google";
+import Footer from './components/footer';
 
 const inter = Inter({
   variable: "--font-inter",
@@ -43,8 +43,16 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
-        {children} 
+      {/* 1. Navbar must be inside body */}
+      <body className={`${inter.variable} antialiased min-h-screen flex flex-col`}>
+        
+        {/* 2. Main content takes up available space */}
+        <main className="flex-grow">
+          {children}
+        </main>
+
+        {/* 3. Footer must be inside body */}
+        {/* <Footer /> */}
       </body>
     </html>
   );

@@ -76,7 +76,7 @@ export default function DeliverySettings({ deliverySettings, setDeliverySettings
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
           <div className="flex items-center gap-4 mb-4">
             <DollarSign className="text-emerald-600" size={26} />
-            <label className="text-lg font-medium text-gray-700">Delivery Fee (SAR)</label>
+            <label className="text-lg font-medium text-gray-700">Delivery Fee</label>
           </div>
           <div className="relative">
             <input
@@ -87,7 +87,7 @@ export default function DeliverySettings({ deliverySettings, setDeliverySettings
               className="w-full px-5 py-5 bg-gray-50 rounded-xl text-2xl font-bold text-center focus:outline-none focus:ring-4 focus:ring-emerald-500 transition"
               step="0.5"
             />
-            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-2xl font-bold text-gray-700">SAR</span>
+            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-2xl font-bold text-gray-700"></span>
           </div>
         </div>
 
@@ -106,7 +106,7 @@ export default function DeliverySettings({ deliverySettings, setDeliverySettings
               className="w-full px-5 py-5 bg-gray-50 rounded-xl text-2xl font-bold text-center focus:outline-none focus:ring-4 focus:ring-purple-500 transition"
               step="0.5"
             />
-            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-2xl font-bold text-gray-700">SAR</span>
+            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-2xl font-bold text-gray-700"></span>
           </div>
           <p className="text-center text-sm text-gray-600 mt-3">Required for delivery orders</p>
         </div>

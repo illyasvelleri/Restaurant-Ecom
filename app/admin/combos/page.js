@@ -150,7 +150,7 @@ export default function ComboOffersPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-gray-900">{combo.title}</h3>
-                  <p className="text-sm text-gray-600">{combo.items?.length || 0} items • {combo.price} SAR</p>
+                  <p className="text-sm text-gray-600">{combo.items?.length || 0} items • {combo.price}</p>
                 </div>
                 <button
                   onClick={() => removeCombo(combo._id)}
@@ -204,7 +204,7 @@ export default function ComboOffersPage() {
                   </div>
                   <div className="p-3">
                     <p className="font-semibold text-gray-900 truncate">{product.name}</p>
-                    <p className="text-lg font-bold text-gray-900 mt-1">{product.price} SAR</p>
+                    <p className="text-lg font-bold text-gray-900 mt-1">{product.price}</p>
                   </div>
                 </button>
               );
@@ -219,7 +219,7 @@ export default function ComboOffersPage() {
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Selected {selectedProducts.length} items</p>
                 <p className="text-xl font-bold">
-                  {totalPrice.toFixed(2)} SAR → <span className="text-emerald-600">{comboPrice} SAR</span>
+                  {totalPrice.toFixed(2)} → <span className="text-emerald-600">{comboPrice}</span>
                 </p>
               </div>
               <button
@@ -338,7 +338,7 @@ function CreateComboModal({ selectedProducts, totalPrice, comboPrice, onClose, o
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div>
             <p className="text-sm text-gray-500 mb-1">Original Price</p>
-            <p className="text-2xl font-bold line-through text-gray-400">{totalPrice.toFixed(2)} SAR</p>
+            <p className="text-2xl font-bold line-through text-gray-400">{totalPrice.toFixed(2)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-1">Combo Price</p>

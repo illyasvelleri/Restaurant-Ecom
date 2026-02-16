@@ -5,6 +5,7 @@
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "react-hot-toast";
 import Navbar from "../components/navbar";
+import Footer from '../components/footer';
 
 export default function ClientProviders({ children }) {
   return (
@@ -26,6 +27,7 @@ export default function ClientProviders({ children }) {
           error:   { style: { background: "#ef4444" } },
         }}
       />
+      <Footer/>
     </SessionProvider>
   );
 }

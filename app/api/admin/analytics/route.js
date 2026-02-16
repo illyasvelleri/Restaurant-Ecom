@@ -100,7 +100,7 @@ export async function GET(req) {
         const topProducts = topProductsRaw.map(p => ({
             name: p.name,
             sales: p.sales,
-            revenue: Math.round(p.revenue).toLocaleString() + " SAR"
+            revenue: Math.round(p.revenue).toLocaleString() + ""
         }));
 
         // 4. HOURLY ORDERS (TODAY)

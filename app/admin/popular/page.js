@@ -148,7 +148,7 @@ export default function PopularProductsPage() {
                     {product?.name || "Deleted Product"}
                   </p>
                   <p className="text-lg font-bold text-gray-900 mt-1">
-                    {product?.price ? `${product.price} SAR` : "N/A"}
+                    {product?.price ? `${product.price}` : "N/A"}
                   </p>
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function PopularProductsPage() {
                 </div>
                 <div className="p-3">
                   <p className="font-semibold text-gray-900 truncate">{product.name}</p>
-                  <p className="text-lg font-bold text-gray-900 mt-1">{product.price} SAR</p>
+                  <p className="text-lg font-bold text-gray-900 mt-1">{product.price}</p>
                 </div>
               </button>
             ))}

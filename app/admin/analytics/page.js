@@ -96,7 +96,7 @@ export default function AnalyticsPage() {
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-5 text-white">
                         <DollarSign size={32} className="mb-2" />
-                        <p className="text-3xl font-bold">{metrics.revenue || "0"} SAR</p>
+                        <p className="text-3xl font-bold">{metrics.revenue || "0"}</p>
                         <p className="text-sm opacity-90">Revenue</p>
                     </div>
                     <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white">
@@ -106,7 +106,7 @@ export default function AnalyticsPage() {
                     </div>
                     <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-5 text-white">
                         <Clock size={32} className="mb-2" />
-                        <p className="text-3xl font-bold">{metrics.avgOrder || "0"} SAR</p>
+                        <p className="text-3xl font-bold">{metrics.avgOrder || "0"}</p>
                         <p className="text-sm opacity-90">Avg Order</p>
                     </div>
                     <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-5 text-white">

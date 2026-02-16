@@ -165,7 +165,7 @@ export default function ProductsPage() {
                 <div className="flex-1">
                   <h3 className="font-bold text-gray-900">{product.name}</h3>
                   <p className="text-sm text-gray-500">{product.category}</p>
-                  <p className="text-xl font-bold text-gray-900 mt-1">{product.price} SAR</p>
+                  <p className="text-xl font-bold text-gray-900 mt-1">{product.price}</p>
                 </div>
                 <div className="flex flex-col gap-2">
                   <button

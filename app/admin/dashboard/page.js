@@ -79,7 +79,7 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-2 gap-4">
             <StatsCard
               title="Revenue Today"
-              value={`${stats.todayRevenue || 0} SAR`}
+              value={`${stats.todayRevenue || 0}`}
               change={stats.revenueGrowth || 0}
               icon={DollarSign}
               color="from-emerald-500 to-teal-600"
@@ -139,7 +139,7 @@ export default function AdminDashboard() {
                     <p className="text-gray-600">{order.phone}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-lg text-gray-900">{order.total.toFixed(2)} SAR</p>
+                    <p className="font-bold text-lg text-gray-900">{order.total.toFixed(2)}</p>
                     <p className="text-xs text-gray-500">{formatTime(order.createdAt)}</p>
                   </div>
                 </div>

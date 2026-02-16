@@ -76,7 +76,7 @@ const ProductCard = ({ product, onEdit, onDelete, onView }) => {
         <div className="flex items-start justify-between mb-2">
           <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{product.name}</h3>
           <span className="text-xl font-bold text-orange-600">
-            {parseFloat(product.price).toFixed(2)} SAR
+            {parseFloat(product.price).toFixed(2)}
           </span>
         </div>
 
