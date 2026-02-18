@@ -1,4 +1,4 @@
-// models/User.js → WhatsApp + Full Saudi Delivery Ready (2025 Best Practice)
+// models/User.js → Simplified
 
 import mongoose from "mongoose";
 
@@ -13,28 +13,41 @@ const UserSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 30,
     },
+
     password: {
       type: String,
       required: true,
-      select: false, // don't return password by default
+      select: false,
     },
+
     role: {
       type: String,
-      enum: ["user", "admin", "superadmin"],
+      enum: [
+        "user",
+        "staff",
+        "kitchen",
+        "kitchen_manager",
+        "waiter",
+        "cashier",
+        "delivery_boy",
+        "manager",
+        "admin",
+        "superadmin"
+      ],
       default: "user",
     },
 
-    // MAIN CONTACT — WhatsApp is primary in Saudi
+    // MAIN CONTACT (WhatsApp-first)
     whatsapp: {
       type: String,
       trim: true,
       sparse: true,
       unique: true,
-      match: [/^\d{9,15}$/, "Please enter a valid WhatsApp number"],
+      match: [/^\d{9,15}$/, "Invalid WhatsApp number"],
       default: null,
     },
 
-    // OPTIONAL PROFILE
+    // PROFILE
     name: {
       type: String,
       trim: true,
@@ -42,37 +55,36 @@ const UserSchema = new mongoose.Schema(
         return this.username;
       },
     },
+
     email: {
       type: String,
       lowercase: true,
       trim: true,
       sparse: true,
       unique: true,
-      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
+      match: [/^\S+@\S+\.\S+$/, "Invalid email"],
       default: null,
     },
 
-    // SAUDI DELIVERY ADDRESS — Full & Real-World Ready
-    address: { type: String, trim: true, default: "" },           // Street / Landmark
-    building: { type: String, trim: true, default: "" },         // Building or Villa No.
-    floor: { type: String, trim: true, default: "" },            // Floor number
-    apartment: { type: String, trim: true, default: "" },        // Apartment / Office No.
-    neighborhood: { type: String, trim: true, default: "" },     // District (e.g. Al Olaya)
-    city: {
-      type: String,
-      trim: true,
-      default: "",
-      maxlength: 100,
-    },
-    pincode: { type: String, trim: true, default: "" },          // Saudi postal code
+    // DELIVERY ADDRESS
+    address: { type: String, trim: true, default: "" },
+    building: { type: String, trim: true, default: "" },
+    floor: { type: String, trim: true, default: "" },
+    apartment: { type: String, trim: true, default: "" },
+    neighborhood: { type: String, trim: true, default: "" },
+    city: { type: String, trim: true, default: "", maxlength: 100 },
+    pincode: { type: String, trim: true, default: "" },
 
-    // OPTIONAL EXTRAS
-    notes: { type: String, trim: true, default: "" },            // e.g. "Near mosque"
+    notes: { type: String, trim: true, default: "" },
 
-    // USER SETTINGS
+    // SETTINGS
     notifications: { type: Boolean, default: true },
     locationAccess: { type: Boolean, default: true },
-    preferredLanguage: { type: String, default: "en", enum: ["en", "ar"] },
+    preferredLanguage: {
+      type: String,
+      default: "en",
+      enum: ["en", "ar"],
+    },
 
     // PASSWORD RESET
     resetPasswordToken: { type: String, select: false },
@@ -80,15 +92,14 @@ const UserSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    strict: false,
+    strict: true, // changed from false (important)
   }
 );
 
-// Indexes for performance
+/* Indexes */
 UserSchema.index({ username: 1 });
 UserSchema.index({ whatsapp: 1 }, { sparse: true });
 UserSchema.index({ email: 1 }, { sparse: true });
-UserSchema.index({ pincode: 1 });
 UserSchema.index({ city: 1, neighborhood: 1 });
 
 const User = mongoose.models.User || mongoose.model("User", UserSchema);

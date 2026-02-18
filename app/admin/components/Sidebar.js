@@ -15,9 +15,11 @@ export default function Sidebar() {
   const menuItems = [
     { id: 'dashboard', icon: Home, label: 'Dashboard', path: '/admin/dashboard' },
     { id: 'orders', icon: ShoppingBag, label: 'Orders', badge: '12', path: '/admin/orders' },
+    { id: 'users', icon: ShoppingBag, label: 'Users', path: '/admin/users' },
     { id: 'products', icon: Package, label: 'Products', path: '/admin/products' },
     { id: 'popular', icon: TrendingUp, label: 'Popular', path: '/admin/popular' },
     { id: 'combos', icon: Sandwich, label: 'Combos', path: '/admin/combos' },
+    { id: 'pricing-rules', icon: Sandwich, label: 'Pricing-Rules', path: '/admin/pricing-rules' },
     { id: 'customers', icon: Users, label: 'Customers', path: '/admin/customers' },
     { id: 'analytics', icon: TrendingUp, label: 'Analytics', path: '/admin/analytics' },
     { id: 'settings', icon: Settings, label: 'Settings', path: '/admin/settings' },

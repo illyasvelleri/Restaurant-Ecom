@@ -1,3 +1,5 @@
+
+//admin/layout
 import "../globals.css";
 import { Inter } from "next/font/google";
 import AdminClientWrapper from "./components/AdminClientWrapper";

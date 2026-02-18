@@ -1,4 +1,5 @@
 // models/PublicSetting.js
+//public-safe fields to fethc and display front end of web about restaurant
 import mongoose from 'mongoose';
 
 const publicSettingSchema = new mongoose.Schema({
