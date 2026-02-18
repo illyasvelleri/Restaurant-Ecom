@@ -48,7 +48,6 @@ export default function InventoryLogPage() {
     setLoading(true);
     try {
       let url = `/api/inventory-log`;
-
       if (typeFilter !== 'all') url += `?type=${typeFilter}`;
       if (startDate) url += `${url.includes('?') ? '&' : '?'}startDate=${startDate}`;
       if (endDate) url += `${url.includes('?') ? '&' : '?'}endDate=${endDate}`;
@@ -76,7 +75,6 @@ export default function InventoryLogPage() {
 
   const handleSubmitLog = async (e) => {
     e.preventDefault();
-
     if (!logForm.productId) return toast.error('Please select a product');
     if (!logForm.quantity || isNaN(logForm.quantity) || Number(logForm.quantity) === 0) {
       return toast.error('Enter a valid non-zero quantity');
@@ -103,14 +101,7 @@ export default function InventoryLogPage() {
 
       toast.success('Inventory log entry created');
       setShowAddLogModal(false);
-      setLogForm({
-        productId: '',
-        type: 'manual-adjustment',
-        quantity: '',
-        reason: '',
-        notes: '',
-      });
-
+      setLogForm({ productId: '', type: 'manual-adjustment', quantity: '', reason: '', notes: '' });
       fetchInventoryLogs();
     } catch (err) {
       toast.error(err.message || 'Failed to create log entry');
@@ -153,8 +144,7 @@ export default function InventoryLogPage() {
     link.click();
   };
 
- 
-  if (loading && !branch) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -169,47 +159,38 @@ export default function InventoryLogPage() {
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => router.back()}
-                className="p-2 hover:bg-gray-100 rounded-full transition"
-              >
-                <ArrowLeft size={24} />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Inventory Log — {branch?.name || 'Branch'}
-                </h1>
-                <p className="text-sm text-gray-600">
-                  Track stock movements, sales, restocks, waste & adjustments
-                </p>
-              </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-full transition">
+              <ArrowLeft size={24} />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Inventory Log</h1>
+              <p className="text-sm text-gray-600">
+                Track stock movements, sales, restocks, waste & adjustments
+              </p>
             </div>
+          </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowAddLogModal(true)}
-                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm"
-              >
-                <PlusCircle size={18} />
-                Manual Adjustment / Waste
-              </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowAddLogModal(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm"
+            >
+              <PlusCircle size={18} /> Manual Adjustment / Waste
+            </button>
 
-              <button
-                onClick={exportCSV}
-                disabled={!filteredLogs.length}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition ${
-                  !filteredLogs.length
-                    ? 'text-gray-400 border-gray-200 cursor-not-allowed'
-                    : 'text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <Download size={18} />
-                Export CSV
-              </button>
-            </div>
+            <button
+              onClick={exportCSV}
+              disabled={!filteredLogs.length}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition ${
+                !filteredLogs.length
+                  ? 'text-gray-400 border-gray-200 cursor-not-allowed'
+                  : 'text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              <Download size={18} /> Export CSV
+            </button>
           </div>
         </div>
       </div>
@@ -285,12 +266,7 @@ export default function InventoryLogPage() {
         </div>
 
         {/* Logs Table */}
-        {loading ? (
-          <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
-            <Loader2 className="w-10 h-10 animate-spin text-blue-600 mx-auto mb-4" />
-            <p className="text-gray-600">Loading inventory movements...</p>
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
             <p className="text-red-700 text-lg font-medium">{error}</p>
             <button
@@ -311,7 +287,7 @@ export default function InventoryLogPage() {
             <p className="mt-2">
               {search || typeFilter !== 'all' || startDate || endDate
                 ? 'Try adjusting filters'
-                : 'No stock movements recorded yet for this branch'}
+                : 'No stock movements recorded yet'}
             </p>
           </div>
         ) : (
@@ -411,8 +387,8 @@ export default function InventoryLogPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">Select product</option>
-                  {branchProducts.map(p => (
-                    <option key={p._id} value={p.productId || p._id}>
+                  {products.map(p => (
+                    <option key={p._id} value={p._id}>
                       {p.name} ({p.category || '—'})
                     </option>
                   ))}
