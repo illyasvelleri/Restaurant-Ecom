@@ -3,6 +3,38 @@ import { NextResponse } from "next/server";
 import Order from "@/models/Orders"; // Ensure correct path
 import connectDB from "@/lib/db";
 
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
+export async function GET(req) {
+  await connectDB();
+  const { searchParams } = new URL(req.url);
+  const orderId = searchParams.get("orderId");
+
+  if (!orderId) {
+    return new Response(JSON.stringify({ error: "orderId is required" }), {
+      status: 400,
+    });
+  }
+
+  try {
+    const order = await Order.findOne({ orderId });
+
+    if (!order) {
+      return new Response(JSON.stringify({ error: "Order not found" }), {
+        status: 404,
+      });
+    }
+
+    return new Response(JSON.stringify(order), { status: 200 });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+  }
+}
+
+
 export async function POST(req) {
   await connectDB();
   const body = await req.json();
