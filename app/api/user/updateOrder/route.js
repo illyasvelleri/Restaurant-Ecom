@@ -34,67 +34,28 @@ export async function GET(req) {
   }
 }
 
-
-// export async function POST(req) {
-//   await connectDB();
-//   const body = await req.json();
-//   const { orderId, items, totalAmount, address, notes, customerName, customerPhone } = body;
-
-//   if (!orderId) {
-//     return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
-//   }
-
-//   try {
-//     // Find the order by orderId
-//     const order = await Order.findOne({ orderId });
-
-//     if (!order) {
-//       return NextResponse.json({ error: "Order not found" }, { status: 404 });
-//     }
-
-//     // Update only allowed fields
-//     if (items) {
-//       order.items = items.map(item => ({
-//         name: item.name,
-//         quantity: item.quantity,
-//         price: parseFloat(item.price),
-//         addons: (item.addons || []).map(a => ({ name: a.name, price: parseFloat(a.price) }))
-//       }));
-//     }
-
-//     if (totalAmount) order.total = parseFloat(totalAmount);
-//     if (address) order.deliveryAddress = address;
-//     if (notes !== undefined) order.notes = notes;
-//     if (customerName) order.customerName = customerName;
-//     if (customerPhone) order.phone = customerPhone;
-//     if (customerPhone) order.whatsapp = customerPhone;
-
-//     await order.save();
-
-//     return NextResponse.json({ success: true, order });
-//   } catch (error) {
-//     console.error("Order update failed:", error);
-//     return NextResponse.json({ error: error.message }, { status: 500 });
-//   }
-// }
-
-
 export async function POST(req) {
   await connectDB();
   const body = await req.json();
-  const { orderId, status, items, totalAmount, address, notes, customerName, customerPhone } = body;
+  const { 
+    orderId, 
+    status, 
+    items, 
+    totalAmount, 
+    address, 
+    notes, 
+    customerName, 
+    customerPhone,
+    timezone = "UTC" // Default to UTC if not provided
+  } = body;
 
-  if (!orderId) {
-    return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
-  }
+  if (!orderId) return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
 
   try {
     const order = await Order.findOne({ orderId });
-    if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
-    }
+    if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
-    // --- NEW: 5 MINUTE CANCELLATION CHECK ---
+    // 1. 5-MINUTE CANCELLATION CHECK (Works globally because both are UTC)
     if (status === "cancelled") {
       const now = new Date();
       const createdTime = new Date(order.createdAt);
@@ -104,30 +65,39 @@ export async function POST(req) {
         return NextResponse.json({ 
           success: false, 
           error: "TIME_EXCEEDED",
-          message: "Cancellation only allowed within 5 minutes of ordering." 
+          message: "Cancellation only allowed within 5 minutes." 
         }, { status: 403 });
       }
     }
-    // ----------------------------------------
 
+    // 2. UPDATE FIELDS
     if (status) order.status = status;
-    if (items) {
-      order.items = items.map(item => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: parseFloat(item.price),
-        addons: (item.addons || []).map(a => ({ name: a.name, price: parseFloat(a.price) }))
-      }));
-    }
-
+    if (items) order.items = items;
     if (totalAmount) order.total = parseFloat(totalAmount);
     if (address) order.deliveryAddress = address;
     if (notes !== undefined) order.notes = notes;
     if (customerName) order.customerName = customerName;
-    if (customerPhone) order.phone = customerPhone;
+    if (customerPhone) {
+        order.phone = customerPhone;
+        order.whatsapp = customerPhone;
+    }
 
     await order.save();
-    return NextResponse.json({ success: true, order });
+
+    // 3. GENERATE DYNAMIC LOCAL TIME FOR RESPONSE
+    // This converts the UTC DB time to the user's specific local time
+    const localOrderTime = new Intl.DateTimeFormat('en-GB', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: timezone, // e.g., 'Asia/Kolkata' or 'Asia/Dubai'
+    }).format(new Date(order.createdAt));
+
+    return NextResponse.json({ 
+      success: true, 
+      localOrderTime, // Sent back to Telegram/Frontend
+      order 
+    });
+    
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
