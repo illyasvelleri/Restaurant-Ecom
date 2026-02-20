@@ -97,8 +97,6 @@ const UserSchema = new mongoose.Schema(
 );
 
 /* Indexes */
-UserSchema.index({ username: 1 });
-UserSchema.index({ whatsapp: 1 }, { sparse: true });
 UserSchema.index({ email: 1 }, { sparse: true });
 UserSchema.index({ city: 1, neighborhood: 1 });
 

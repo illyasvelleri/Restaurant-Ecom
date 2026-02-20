@@ -9,8 +9,48 @@ import { Loader2, ChevronLeft, UserPlus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function RegisterPage() {
+  const [usernameStatus, setUsernameStatus] = useState({ loading: false, available: null });
+  const [whatsappStatus, setWhatsappStatus] = useState({ loading: false, available: null });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+
+  // Add this function inside RegisterPage
+  const checkUsername = async (name) => {
+    if (name.length < 3) {
+      setUsernameStatus({ loading: false, available: null });
+      return;
+    }
+
+    setUsernameStatus({ loading: true, available: null });
+    try {
+      const res = await fetch(`/api/auth/check-availability?username=${name}`);
+      const data = await res.json();
+      setUsernameStatus({ loading: false, available: data.available });
+    } catch (err) {
+      setUsernameStatus({ loading: false, available: null });
+    }
+  };
+
+
+  // 2. Add this function inside your component
+  const checkWhatsappLive = async (number) => {
+    const cleanNumber = number.replace(/\D/g, "");
+
+    if (cleanNumber.length < 9) {
+      setWhatsappStatus({ loading: false, available: null });
+      return;
+    }
+
+    setWhatsappStatus({ loading: true, available: null });
+    try {
+      const res = await fetch(`/api/auth/check-availability?whatsapp=${cleanNumber}`);
+      const data = await res.json();
+      setWhatsappStatus({ loading: false, available: data.available });
+    } catch (err) {
+      setWhatsappStatus({ loading: false, available: null });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +59,7 @@ export default function RegisterPage() {
     const formData = new FormData(e.target);
     const data = {
       username: formData.get("username"),
-      whatsapp: formData.get("whatsapp") || "",
+      whatsapp: formData.get("whatsapp")?.trim() || "",
       password: formData.get("password"),
     };
 
@@ -55,11 +95,11 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-white flex overflow-hidden">
-      
+
       {/* LEFT SIDE: THE ATMOSPHERE (Visible only on PC) */}
       <div className="hidden lg:flex lg:w-1/2 bg-black relative p-20 flex-col justify-between overflow-hidden">
         <div className="absolute inset-0 opacity-40">
-           <div className="absolute top-[-10%] right-[-10%] w-[80%] h-[80%] bg-white/10 blur-[120px] rounded-full" />
+          <div className="absolute top-[-10%] right-[-10%] w-[80%] h-[80%] bg-white/10 blur-[120px] rounded-full" />
         </div>
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10">
@@ -69,7 +109,7 @@ export default function RegisterPage() {
         </motion.div>
 
         <div className="relative z-10">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-8xl font-light text-white tracking-tighter leading-none"
@@ -89,8 +129,8 @@ export default function RegisterPage() {
 
       {/* RIGHT SIDE: THE INTERFACE (Mobile + PC) */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#fdfdfd] lg:bg-white overflow-y-auto">
-        
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-[440px] py-12"
@@ -110,30 +150,52 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Username */}
             <div className="group space-y-3">
-              <label className="text-xs font-bold tracking-widest text-gray-500 uppercase ml-1 group-focus-within:text-black transition-colors">
-                Username
-              </label>
+              <div className="flex justify-between items-center px-1">
+                <label className="text-xs font-bold tracking-widest text-gray-500 uppercase group-focus-within:text-black transition-colors">
+                  Username
+                </label>
+                {usernameStatus.available === false && (
+                  <span className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">Already Taken</span>
+                )}
+                {usernameStatus.available === true && (
+                  <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-tighter">Available</span>
+                )}
+              </div>
               <input
                 name="username"
                 type="text"
                 required
-                minLength="3"
+                onChange={(e) => checkUsername(e.target.value)} // Trigger the check
                 placeholder="e.g. alex_chef"
-                className="w-full bg-white border border-gray-200 rounded-2xl py-5 px-6 text-[16px] text-black placeholder:text-gray-300 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
+                className={`w-full bg-white border ${usernameStatus.available === false ? "border-red-200" : "border-gray-200"
+                  } rounded-2xl py-5 px-6 text-[16px] text-black focus:outline-none focus:border-black transition-all shadow-sm`}
               />
             </div>
 
             {/* WhatsApp */}
+            {/* WhatsApp */}
             <div className="group space-y-3">
               <div className="flex justify-between items-center px-1">
-                <label className="text-xs font-bold tracking-widest text-gray-500 uppercase group-focus-within:text-black transition-colors">WhatsApp Number</label>
-                <span className="text-[11px] font-bold text-gray-300 uppercase tracking-tighter italic">Optional</span>
+                <label className="text-xs font-bold tracking-widest text-gray-500 uppercase group-focus-within:text-black transition-colors">
+                  WhatsApp Number
+                </label>
+                <div className="flex gap-2 items-center">
+                  {whatsappStatus.available === false && (
+                    <span className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">Already Linked</span>
+                  )}
+                  {whatsappStatus.available === true && (
+                    <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-tighter">New Number</span>
+                  )}
+                  <span className="text-[11px] font-bold text-gray-300 uppercase tracking-tighter italic">Optional</span>
+                </div>
               </div>
               <input
                 name="whatsapp"
                 type="tel"
+                onChange={(e) => checkWhatsappLive(e.target.value)}
                 placeholder="966 ••• ••• •••"
-                className="w-full bg-white border border-gray-200 rounded-2xl py-5 px-6 text-[16px] text-black placeholder:text-gray-300 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-sm"
+                className={`w-full bg-white border ${whatsappStatus.available === false ? "border-red-200" : "border-gray-200"
+                  } rounded-2xl py-5 px-6 text-[16px] text-black focus:outline-none focus:border-black transition-all shadow-sm`}
               />
             </div>
 
