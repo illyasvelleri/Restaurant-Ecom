@@ -138,6 +138,12 @@ const OrderSchema = new mongoose.Schema(
       index: true,
     },
 
+    confirmedAt: {
+      type: Date,
+      default: null,
+      index: true // for fast queries
+    },
+    
     paymentMethod: {
       type: String,
       enum: ["cash", "card-online", "apple-pay", "stc-pay"],
