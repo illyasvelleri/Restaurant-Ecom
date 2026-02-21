@@ -908,7 +908,8 @@
 "use client";
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0; // optional: disable cache if needed
+export const revalidate = 0;      // disable any revalidation
+export const fetchCache = 'force-no-store'; // no fetch caching
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
