@@ -1,8 +1,9 @@
 // app/api/admin/analytics/route.js → FINAL 2025 DYNAMIC ANALYTICS API
-
 import connectDB from "@/lib/db";
 import Order from "@/models/Orders";
 import Product from "@/models/Product";
+
+export const dynamic = 'force-dynamic'; // Ensure no static caching
 
 export async function GET(req) {
     try {
@@ -11,60 +12,60 @@ export async function GET(req) {
         const { searchParams } = new URL(req.url);
         const range = searchParams.get("range") || "7days";
 
-        // DATE RANGE CALCULATION
+        // --- DATE RANGE CALCULATION ---
         const now = new Date();
-        let startDate;
+        let startDate = new Date();
 
+        // Use a copy to avoid mutating 'now' in the switch
         switch (range) {
             case "7days":
-                startDate = new Date(now.setDate(now.getDate() - 7));
+                startDate.setDate(now.getDate() - 7);
                 break;
             case "30days":
-                startDate = new Date(now.setDate(now.getDate() - 30));
+                startDate.setDate(now.getDate() - 30);
                 break;
             case "90days":
-                startDate = new Date(now.setMonth(now.getMonth() - 3));
+                startDate.setMonth(now.getMonth() - 3);
                 break;
             case "year":
-                startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+                startDate.setFullYear(now.getFullYear() - 1);
                 break;
             default:
-                startDate = new Date(now.setDate(now.getDate() - 7));
+                startDate.setDate(now.getDate() - 7);
         }
 
-        // 1. DAILY REVENUE + ORDERS
+        // --- 1. DAILY REVENUE + ORDERS ---
         const revenueByDay = await Order.aggregate([
             { $match: { createdAt: { $gte: startDate }, status: { $ne: "cancelled" } } },
             {
                 $group: {
                     _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                    revenue: { $sum: "$total" },
+                    revenue: { $sum: "$totalAmount" }, // Use totalAmount as per your schema
                     orders: { $sum: 1 }
                 }
             },
             { $sort: { _id: 1 } }
         ]);
 
-        // Format for chart
         const revenueData = revenueByDay.map(d => ({
             name: new Date(d._id).toLocaleDateString('en', { weekday: 'short' }),
             revenue: Math.round(d.revenue),
             orders: d.orders
         }));
 
-        // 2. SALES BY CATEGORY
+        // --- 2. SALES BY CATEGORY ---
         const categorySales = await Order.aggregate([
             { $match: { createdAt: { $gte: startDate }, status: { $ne: "cancelled" } } },
             { $unwind: "$items" },
             {
                 $lookup: {
                     from: "products",
-                    localField: "items.productId",
-                    foreignField: "_id",
+                    localField: "items.name", // If you don't store productId, lookup by name
+                    foreignField: "name",
                     as: "product"
                 }
             },
-            { $unwind: "$product" },
+            { $unwind: { path: "$product", preserveNullAndEmptyArrays: true } },
             {
                 $group: {
                     _id: "$product.category",
@@ -76,18 +77,18 @@ export async function GET(req) {
 
         const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#6366f1'];
         const categoryData = categorySales.map((c, i) => ({
-            name: c._id || "Unknown",
+            name: c._id || "Other",
             value: Math.round(c.value),
             color: COLORS[i % COLORS.length]
         }));
 
-        // 3. TOP 6 PRODUCTS
+        // --- 3. TOP 6 PRODUCTS ---
         const topProductsRaw = await Order.aggregate([
             { $match: { createdAt: { $gte: startDate }, status: { $ne: "cancelled" } } },
             { $unwind: "$items" },
             {
                 $group: {
-                    _id: "$items.productId",
+                    _id: "$items.name",
                     name: { $first: "$items.name" },
                     sales: { $sum: "$items.quantity" },
                     revenue: { $sum: { $multiply: ["$items.quantity", "$items.price"] } }
@@ -100,60 +101,58 @@ export async function GET(req) {
         const topProducts = topProductsRaw.map(p => ({
             name: p.name,
             sales: p.sales,
-            revenue: Math.round(p.revenue).toLocaleString() + ""
+            revenue: Math.round(p.revenue).toLocaleString()
         }));
 
-        // 4. HOURLY ORDERS (TODAY)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // --- 4. HOURLY ORDERS (FIXED ARRAY SYNTAX) ---
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
 
         const hourlyRaw = await Order.aggregate([
-            [
-                { $match: { createdAt: { $gte: today }, status: { $ne: "cancelled" } } },
-                {
-                    $group: {
-                        _id: { $hour: "$createdAt" },
-                        orders: { $sum: 1 }
-                    }
-                },
-                { $sort: { _id: 1 } }
-            ]]);
+            { $match: { createdAt: { $gte: startOfToday }, status: { $ne: "cancelled" } } },
+            {
+                $group: {
+                    _id: { $hour: "$createdAt" },
+                    orders: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
 
         const hourlyData = Array.from({ length: 24 }, (_, i) => {
-            const hour = hourlyRaw.find(h => h._id === i);
+            const hourData = hourlyRaw.find(h => h._id === i);
             return {
                 hour: i < 12 ? `${i === 0 ? 12 : i}AM` : `${i === 12 ? 12 : i - 12}PM`,
-                orders: hour?.orders || 0
+                orders: hourData?.orders || 0
             };
-        }).slice(8, 22); // Only show 8AM - 10PM
+        }).slice(8, 23); // 8 AM to 10 PM
 
-        // 5. KEY METRICS
+        // --- 5. KEY METRICS ---
         const metricsRaw = await Order.aggregate([
             { $match: { createdAt: { $gte: startDate }, status: { $ne: "cancelled" } } },
             {
                 $group: {
                     _id: null,
-                    totalRevenue: { $sum: "$total" },
+                    totalRevenue: { $sum: "$totalAmount" },
                     totalOrders: { $sum: 1 },
-                    avgOrderValue: { $avg: "$total" }
+                    avgOrderValue: { $avg: "$totalAmount" }
                 }
             }
         ]);
 
         const metrics = metricsRaw[0] || { totalRevenue: 0, totalOrders: 0, avgOrderValue: 0 };
 
-        // 6. GROWTH % (vs previous period)
-        const prevStart = new Date(startDate);
-        prevStart.setDate(prevStart.getDate() - (now.getDate() - startDate.getDate()));
+        // --- 6. GROWTH CALCULATION ---
+        const duration = now.getTime() - startDate.getTime();
+        const prevStart = new Date(startDate.getTime() - duration);
 
         const prevRevenue = await Order.aggregate([
             { $match: { createdAt: { $gte: prevStart, $lt: startDate }, status: { $ne: "cancelled" } } },
-            { $group: { _id: null, revenue: { $sum: "$total" } } }
+            { $group: { _id: null, revenue: { $sum: "$totalAmount" } } }
         ]);
 
-        const growth = prevRevenue[0]?.revenue
-            ? ((metrics.totalRevenue - prevRevenue[0].revenue) / prevRevenue[0].revenue) * 100
-            : 0;
+        const oldRev = prevRevenue[0]?.revenue || 0;
+        const growth = oldRev > 0 ? ((metrics.totalRevenue - oldRev) / oldRev) * 100 : 0;
 
         return Response.json({
             revenue: revenueData,
