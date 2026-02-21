@@ -640,7 +640,7 @@ function CartContent() {
         )}
       </AnimatePresence>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4 px-4 sm:px-6 lg:px-8 shadow-lg z-10">
+      <div className="bg-gray-100 border-t border-gray-100 py-4 px-4 sm:px-6 lg:px-8 shadow-lg z-10 mx-6 rounded rounded-3xl">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-center sm:text-left">
             <p className="text-sm text-gray-600">Total</p>
