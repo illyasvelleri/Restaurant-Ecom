@@ -1,7 +1,7 @@
-// app/api/pricing-rules/[id]/route.js
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import DynamicPricingRule from '@/models/DynamicPricingRule';
+import Product from '@/models/Product'; // ADDED: Required to update product flags
 import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
@@ -9,13 +9,13 @@ export const dynamic = 'force-dynamic';
 // Validate MongoDB ObjectId
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
-/* ============================= */
-/* GET SINGLE RULE */
-/* ============================= */
+/* ============================================================ 
+   GET: Fetch a Single Rule
+   ============================================================ */
 export async function GET(request, { params }) {
   try {
     await connectDB();
-    const { id } = params;
+    const { id } = await params;
 
     if (!isValidObjectId(id)) {
       return NextResponse.json({ error: 'Invalid rule ID' }, { status: 400 });
@@ -36,44 +36,65 @@ export async function GET(request, { params }) {
   }
 }
 
-/* ============================= */
-/* UPDATE RULE */
-/* ============================= */
+/* ============================================================ 
+   PUT: Update an Existing Rule
+   ============================================================ */
 export async function PUT(request, { params }) {
   try {
     await connectDB();
-    const { id } = params;
+    const { id } = await params;
 
     if (!isValidObjectId(id)) {
       return NextResponse.json({ error: 'Invalid rule ID' }, { status: 400 });
     }
 
     const body = await request.json();
-    console.log('PUT BODY:', body);
 
     const rule = await DynamicPricingRule.findById(id);
     if (!rule) {
       return NextResponse.json({ error: 'Rule not found' }, { status: 404 });
     }
 
-    // Remove protected fields
-    delete body._id;
-    delete body.createdAt;
-    delete body.updatedAt;
-
+    // --- FIX 1: ReferenceError Fix ---
     const discount = Number(body.discountPercentage) || 0;
-    const increase = Number(body.increasePercentage) || 0;
+    const increase = Number(body.increasePercentage) || 0; 
+    
     if (discount > 0 && increase > 0) {
       return NextResponse.json({ error: 'Cannot apply both discount and increase' }, { status: 400 });
     }
 
-    if (body.productId === '') body.productId = undefined;
-    if (body.productId && !isValidObjectId(body.productId)) {
+    // --- FIX 2: Data Cleaning ---
+    const updates = { ...body };
+
+    if (updates.startTime === "") updates.startTime = undefined;
+    if (updates.endTime === "") updates.endTime = undefined;
+    
+    // --- FIX 3: Product ID handling ---
+    if (!updates.productId || updates.productId === '' || updates.productId === 'null') {
+      updates.productId = null;
+    } else if (!isValidObjectId(updates.productId)) {
       return NextResponse.json({ error: 'Invalid productId' }, { status: 400 });
     }
 
-    Object.assign(rule, body);
+    // 3. Prevent overwriting protected fields
+    delete updates._id;
+    delete updates.createdAt;
+    delete updates.updatedAt;
+
+    // 4. Save with Validation
+    rule.set(updates); 
     await rule.save();
+
+    // --- NEW ADDITION: AUTO-ENABLE DYNAMIC PRICING ON PRODUCTS DURING UPDATE ---
+    // If the rule is being set to ACTIVE, ensure products have the flag enabled
+    if (updates.active !== false) {
+      if (updates.productId) {
+        await Product.findByIdAndUpdate(updates.productId, { $set: { allowDynamicPricing: true } });
+      } else {
+        await Product.updateMany({}, { $set: { allowDynamicPricing: true } });
+      }
+    }
+    // --------------------------------------------------------------------------
 
     const updatedRule = await DynamicPricingRule.findById(id)
       .populate('productId', 'name price category')
@@ -89,13 +110,13 @@ export async function PUT(request, { params }) {
   }
 }
 
-/* ============================= */
-/* DELETE RULE */
-/* ============================= */
+/* ============================================================ 
+   DELETE: Remove a Rule
+   ============================================================ */
 export async function DELETE(request, { params }) {
   try {
     await connectDB();
-    const { id } = params;
+    const { id } = await params;
 
     if (!isValidObjectId(id)) {
       return NextResponse.json({ error: 'Invalid rule ID' }, { status: 400 });

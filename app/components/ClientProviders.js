@@ -27,7 +27,7 @@ export default function ClientProviders({ children }) {
           error:   { style: { background: "#ef4444" } },
         }}
       />
-      <Footer/>
+      {/* <Footer/> */}
     </SessionProvider>
   );
 }

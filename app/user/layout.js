@@ -13,7 +13,7 @@ export default function UserLayout({ children }) {
   return (
     <ClientProviders>
       {/* We use a div or main here instead of body/html */}
-      <main className="min-h-screen flex flex-col">
+      <main className="min-h-screen flex flex-col pt-36 pb-40">
         {children}
       </main>
     </ClientProviders>

@@ -28,7 +28,7 @@ export default function UserSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50 py-28">
+    <div className="min-h-screen">
       <div className="container mx-auto px-6 max-w-3xl">
         <h1 className="text-4xl font-extrabold text-center mb-4">Settings</h1>
         <p className="text-center text-gray-600 mb-12">Manage your preferences</p>

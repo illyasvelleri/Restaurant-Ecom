@@ -1,3 +1,4 @@
+//user/profile/page.js
 "use client";
 
 import { useState, useEffect } from "react";
@@ -98,17 +99,17 @@ export default function ProfilePage() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 size={45} className="animate-spin text-orange-500" />
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-slate-100 to-white py-28">
+    <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-6 pt-16">
 
         {/* Container */}
-        <div className="bg-white border border-gray-200 rounded-3xl shadow-xl p-8 md:p-12">
+        <div className="border border-gray-200 rounded-3xl shadow-xl p-8 md:p-12">
 
           {/* Header */}
           <div className="text-center mb-14">

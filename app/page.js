@@ -15,7 +15,7 @@ export default function Home() {
         {/* <section className="pt-0">
           <HeroSection />
         </section> */}
-        <section className="">
+        <section className="pt-36 pb-40">
           <Main />
         </section>
         {/* Footer */}

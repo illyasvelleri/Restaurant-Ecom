@@ -21,7 +21,7 @@ export default function Sidebar() {
     { id: 'combos', icon: Sandwich, label: 'Combos', path: '/admin/combos' },
     { id: 'pricing-rules', icon: Sandwich, label: 'Pricing-Rules', path: '/admin/pricing-rules' },
     { id: 'customers', icon: Users, label: 'Customers', path: '/admin/customers' },
-    { id: 'inventoryLog', icon: TrendingUp, label: 'Inventory Log', path: '/admin/inventoryLog' },
+    // { id: 'inventoryLog', icon: TrendingUp, label: 'Inventory Log', path: '/admin/inventoryLog' },
     { id: 'analytics', icon: TrendingUp, label: 'Analytics', path: '/admin/analytics' },
     { id: 'settings', icon: Settings, label: 'Settings', path: '/admin/settings' },
   ];
