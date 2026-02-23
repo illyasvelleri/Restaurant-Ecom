@@ -1097,7 +1097,14 @@ export default function ProductModal({ product, onClose, onSave }) {
           backdrop-filter: blur(16px);
           border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-
+        .select-field{
+          border: 1px solid rgba(255,255,255,0.12);
+          color: #fff;
+          border-radius: 14px;
+          padding: 14px 16px;
+          font-size: 15px;
+          transition: all 0.2s;
+}
         .input-dark {
           background: rgba(255,255,255,0.04);
           border: 1px solid rgba(255,255,255,0.12);
@@ -1244,7 +1251,7 @@ export default function ProductModal({ product, onClose, onSave }) {
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   required
-                  className="select-field w-full"
+                  className="select-field w-full bg-gray-900"
                 >
                   <option value="">Select category</option>
                   <option value="Food">Food</option>
@@ -1345,6 +1352,7 @@ export default function ProductModal({ product, onClose, onSave }) {
             </div>
 
             {/* Addons */}
+            {/* Addons – FIXED for mobile: responsive flex-wrap + better spacing */}
             <div>
               <div className="flex items-center justify-between mb-4">
                 <label className="text-xl font-semibold">Addon Items (Optional)</label>
@@ -1365,7 +1373,10 @@ export default function ProductModal({ product, onClose, onSave }) {
               ) : (
                 <div className="space-y-4">
                   {addons.map((addon, index) => (
-                    <div key={index} className="addon-card flex items-center gap-4">
+                    <div
+                      key={index}
+                      className="addon-card flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4"
+                    >
                       <input
                         type="text"
                         value={addon.name}
@@ -1375,27 +1386,29 @@ export default function ProductModal({ product, onClose, onSave }) {
                           setAddons(newAddons);
                         }}
                         placeholder="e.g. Extra Mayo"
-                        className="flex-1 input-dark"
+                        className="flex-1 input-dark min-w-0"
                       />
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={addon.price}
-                        onChange={(e) => {
-                          const newAddons = [...addons];
-                          newAddons[index].price = e.target.value;
-                          setAddons(newAddons);
-                        }}
-                        placeholder="2.50"
-                        className="w-32 input-dark text-center"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setAddons(addons.filter((_, i) => i !== index))}
-                        className="p-3 bg-red-600/20 hover:bg-red-600/40 rounded-xl transition text-red-400"
-                      >
-                        <MinusCircle size={22} />
-                      </button>
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={addon.price}
+                          onChange={(e) => {
+                            const newAddons = [...addons];
+                            newAddons[index].price = e.target.value;
+                            setAddons(newAddons);
+                          }}
+                          placeholder="2.50"
+                          className="w-full sm:w-32 input-dark text-center"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setAddons(addons.filter((_, i) => i !== index))}
+                          className="p-3 bg-red-600/20 hover:bg-red-600/40 rounded-xl transition text-red-400 flex-shrink-0"
+                        >
+                          <MinusCircle size={22} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
