@@ -118,7 +118,7 @@
 //       localOrderTime,
 //       order 
 //     });
-    
+
 //   } catch (error) {
 //     console.error("Order update failed:", error);
 //     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -162,14 +162,14 @@ export async function POST(req) {
   await connectDB();
   const body = await req.json();
 
-  const { 
-    orderId, 
-    status, 
-    items, 
+  const {
+    orderId,
+    status,
+    items,
     totalAmount,          // optional – we ignore it and always recalculate
-    address, 
-    notes, 
-    customerName, 
+    address,
+    notes,
+    customerName,
     customerPhone,
     timezone = "Asia/Riyadh"  // default to your region
   } = body;
@@ -186,32 +186,62 @@ export async function POST(req) {
 
     const now = new Date();
 
+
     // ──────────────────────────────────────────────
-    // 1. TIME RESTRICTION: Edit & Cancel after confirmation
+    // 1. FIXED TIME RESTRICTION
     // ──────────────────────────────────────────────
-    if (order.status === "confirmed" || status === "confirmed") {
+
+    // Only apply restriction if the order is ALREADY confirmed in the DB
+    if (order.status === "confirmed") {
       const referenceTime = order.confirmedAt || order.createdAt;
       const diffMinutes = (now - referenceTime) / 1000 / 60;
 
-      // Cancel restriction (your original logic)
+      // 1a. Block Cancellation
       if (status === "cancelled" && diffMinutes > 5) {
-        return NextResponse.json({ 
-          success: false, 
+        return NextResponse.json({
+          success: false,
           error: "TIME_EXCEEDED",
-          message: "Cancellation only allowed within 5 minutes after confirmation." 
+          message: "Cancellation only allowed within 5 minutes after confirmation."
         }, { status: 403 });
       }
 
-      // Edit restriction – if any edit fields are sent
-      const isEditAttempt = items || totalAmount || address || notes || customerName || customerPhone;
+      // 1b. Block Edits (only if they are actually changing order details)
+      const isEditAttempt = items || address || customerName || customerPhone;
       if (isEditAttempt && diffMinutes > 5) {
-        return NextResponse.json({ 
-          success: false, 
+        return NextResponse.json({
+          success: false,
           error: "TIME_EXCEEDED",
-          message: "Editing only allowed within 5 minutes after confirmation." 
+          message: "Editing only allowed within 5 minutes after confirmation."
         }, { status: 403 });
       }
     }
+
+    // // ──────────────────────────────────────────────
+    // // 1. TIME RESTRICTION: Edit & Cancel after confirmation
+    // // ──────────────────────────────────────────────
+    // if (order.status === "confirmed" || status === "confirmed") {
+    //   const referenceTime = order.confirmedAt || order.createdAt;
+    //   const diffMinutes = (now - referenceTime) / 1000 / 60;
+
+    //   // Cancel restriction (your original logic)
+    //   if (status === "cancelled" && diffMinutes > 5) {
+    //     return NextResponse.json({ 
+    //       success: false, 
+    //       error: "TIME_EXCEEDED",
+    //       message: "Cancellation only allowed within 5 minutes after confirmation." 
+    //     }, { status: 403 });
+    //   }
+
+    //   // Edit restriction – if any edit fields are sent
+    //   const isEditAttempt = items || totalAmount || address || notes || customerName || customerPhone;
+    //   if (isEditAttempt && diffMinutes > 5) {
+    //     return NextResponse.json({ 
+    //       success: false, 
+    //       error: "TIME_EXCEEDED",
+    //       message: "Editing only allowed within 5 minutes after confirmation." 
+    //     }, { status: 403 });
+    //   }
+    // }
 
     // ──────────────────────────────────────────────
     // 2. Set confirmedAt when status becomes "confirmed"
@@ -223,10 +253,10 @@ export async function POST(req) {
     // ──────────────────────────────────────────────
     // 3. Update allowed fields
     // ──────────────────────────────────────────────
-    if (status)           order.status = status;
-    if (address)          order.deliveryAddress = address;
+    if (status) order.status = status;
+    if (address) order.deliveryAddress = address;
     if (notes !== undefined) order.notes = notes;
-    if (customerName)     order.customerName = customerName;
+    if (customerName) order.customerName = customerName;
     if (customerPhone) {
       order.phone = customerPhone;
       order.whatsapp = customerPhone;
@@ -269,17 +299,17 @@ export async function POST(req) {
       timeZone: timezone
     }).format(order.createdAt);
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       localOrderTime,
-      order 
+      order
     });
-    
+
   } catch (error) {
     console.error("Order update failed:", error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: false,
-      error: error.message || "Internal server error" 
+      error: error.message || "Internal server error"
     }, { status: 500 });
   }
 }
