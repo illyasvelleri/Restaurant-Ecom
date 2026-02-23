@@ -791,22 +791,18 @@ function CartContent() {
 
         /* ── STICKY FOOTER ── */
         .cart-footer {
-          position: fixed;
-          bottom: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: calc(100% - 32px);
-          max-width: 560px;
-          background: #1a1a1a;
-          border-radius: 22px;
-          padding: 18px 22px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          box-shadow: 0 16px 48px rgba(0,0,0,0.22);
-          z-index: 50;
-        }
+    width: calc(100% - 32px);
+    max-width: 560px;
+    margin: 0 auto 40px auto;           /* centers + bottom margin */
+    background: #1a1a1a;
+    border-radius: 22px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.22);
+  }
         .cart-footer-total-label {
           font-size: 9px;
           font-weight: 400;

@@ -142,11 +142,11 @@ export default function MenuPage() {
         )}
       </div>
 
-      {/* Floating Cart Button */}
+      {/* Floating Cart Button – Orangish version with better contrast */}
       {cartCount > 0 && (
         <button
           onClick={() => router.push('/user/cart')}
-          className="fixed bottom-24 right-6 z-50 bg-gray-900 text-white w-14 h-14 md:w-16 md:h-16 rounded-full hover:bg-gray-800 transition-all duration-300 flex items-center justify-center shadow-lg"
+          className="fixed bottom-28 right-6 z-50 bg-gradient-to-br from-amber-600 to-orange-600 text-white w-14 h-14 md:w-16 md:h-16 rounded-full hover:from-amber-500 hover:to-orange-500 transition-all duration-300 flex items-center justify-center shadow-2xl shadow-amber-900/40 active:scale-95"
         >
           <svg
             className="w-6 h-6 md:w-7 md:h-7"
@@ -161,7 +161,7 @@ export default function MenuPage() {
               d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
             />
           </svg>
-          <span className="absolute -top-2 -right-2 bg-gray-900 text-white w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-xs md:text-sm font-medium border-2 border-white">
+          <span className="absolute -top-2 -right-2 bg-amber-600 text-white w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-xs md:text-sm font-bold border-2 border-white shadow-md">
             {cartCount}
           </span>
         </button>
