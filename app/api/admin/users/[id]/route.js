@@ -15,7 +15,7 @@ export async function GET(req, { params }) {
         const { id } = params;
 
         const user = await User.findById(id)
-            .select('username name email whatsapp role assignedBranches isActive')
+            .select('username name email whatsapp role isActive')
             .lean();
 
         if (!user) {
@@ -66,11 +66,6 @@ export async function PUT(req, { params }) {
             }
             updateData.role = body.role;
         }
-        if ('assignedBranches' in body) {
-            updateData.assignedBranches = Array.isArray(body.assignedBranches)
-                ? body.assignedBranches
-                : [];
-        }
         if ('isActive' in body) updateData.isActive = !!body.isActive;
 
         // Optional password change
@@ -81,7 +76,7 @@ export async function PUT(req, { params }) {
         const updated = await User.findByIdAndUpdate(id, updateData, {
             new: true,
             runValidators: true,
-        }).select('username name email whatsapp role assignedBranches isActive');
+        }).select('username name email whatsapp role isActive');
 
         if (!updated) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });

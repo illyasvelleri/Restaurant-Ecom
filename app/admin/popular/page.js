@@ -589,8 +589,6 @@ export default function PopularProductsPage() {
             </div>
           )}
         </div>
-
-        <AdminFooter />
       </div>
     </>
   );

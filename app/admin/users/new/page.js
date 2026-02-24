@@ -247,7 +247,6 @@ export default function NewUserPage() {
     whatsapp: '',
     email: '',
     role: 'manager',
-    assignedBranches: '',
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -275,9 +274,6 @@ export default function NewUserPage() {
         },
         body: JSON.stringify({
           ...formData,
-          assignedBranches: formData.assignedBranches
-            ? formData.assignedBranches.split(',').map(id => id.trim())
-            : [],
         }),
       });
 
@@ -506,22 +502,6 @@ export default function NewUserPage() {
                   </select>
                   <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/50" />
                 </div>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="label-text">
-                  Assigned Branches (comma-separated branch IDs)
-                </label>
-                <input
-                  name="assignedBranches"
-                  value={formData.assignedBranches}
-                  onChange={handleChange}
-                  className="input-field w-full"
-                  placeholder="699351a385a5f25af130dc7b, another-id-here"
-                />
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
-                  Leave empty if not assigned to any branch yet
-                </p>
               </div>
             </div>
 

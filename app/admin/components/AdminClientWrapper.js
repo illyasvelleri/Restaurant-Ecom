@@ -1,4 +1,4 @@
-// // app/admin/components/AdminClientWrapper.js → FINAL FIXED & RESPONSIVE
+// app/admin/components/AdminClientWrapper.js → FINAL FIXED & RESPONSIVE
 
 // "use client";
 
@@ -75,16 +75,54 @@
 // }
 
 
-// app/admin/components/AdminClientWrapper.js → PREMIUM DARK LUXURY REDESIGN 2025 (Mobile-First)
-// app/admin/components/AdminClientWrapper.js → FINAL FIXED & RESPONSIVE (MOBILE SIDEBAR NOW OPENS)
-"use client";
-import Sidebar from "./Sidebar";
 
-export default function AdminClientWrapper({ children }) {
+
+"use client";
+
+import Sidebar from "./Sidebar";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react"; // Added useState
+
+export default function AdminClientWrapper({ children, role, userId }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  
+  // 1. ADD THIS: This stops the Hydration Error by waiting for the browser
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isStaff = ["staff", "manager", "waiter", "chef"].includes(role);
+  const allowedPath = `/admin/role/${userId}`;
+
+  // CLIENT-SIDE GUARD: Prevents the infinite redirect loop
+  useEffect(() => {
+    if (mounted && isStaff && pathname !== allowedPath) {
+      router.replace(allowedPath);
+    }
+  }, [mounted, pathname, isStaff, userId, router, allowedPath]);
+
+  // 2. ADD THIS: If not mounted, return a simple empty div to match server
+  if (!mounted) {
+    return <div className="min-h-screen bg-gray-50" />;
+  }
+
+  // STAFF VIEW: No Sidebar, Black Background
+  if (isStaff) {
+    return (
+      <div className="min-h-screen bg-[#080b10]">
+        <main className="w-full">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
+  // ADMIN VIEW: Full Sidebar Layout
   return (
     <div className="flex min-h-screen bg-gray-50">
-      
-      {/* 1. THE MOBILE OVERLAY (Independent) */}
+      {/* Mobile Overlay */}
       <div 
         className="mobile-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden lg:hidden"
         onClick={() => {
@@ -93,7 +131,7 @@ export default function AdminClientWrapper({ children }) {
         }}
       />
 
-      {/* 2. THE SLIDING MOBILE SIDEBAR CONTAINER */}
+      {/* Sliding Mobile Sidebar */}
       <aside 
         id="mobile-sidebar"
         className="fixed inset-y-0 left-0 z-[100] w-[280px] transform -translate-x-full lg:hidden transition-transform duration-300 ease-in-out"
@@ -101,27 +139,26 @@ export default function AdminClientWrapper({ children }) {
         <Sidebar />
       </aside>
 
-      {/* 3. THE FIXED DESKTOP SIDEBAR */}
+      {/* Desktop Sidebar */}
       <aside className="hidden lg:block fixed inset-y-0 left-0 z-40 w-72 h-screen">
         <Sidebar />
       </aside>
 
-      {/* 4. MAIN CONTENT AREA */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
-        {/* MOBILE HEADER */}
         <header className="lg:hidden sticky top-0 z-30 bg-[#0a0e16] text-white px-5 py-4 flex items-center justify-between">
           <button
             onClick={() => {
               document.getElementById('mobile-sidebar')?.classList.remove('-translate-x-full');
               document.querySelector('.mobile-overlay')?.classList.remove('hidden');
             }}
-            className="p-2 bg-white/5 rounded-lg active:scale-90 transition"
+            className="p-2 bg-white/5 rounded-lg transition"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="font-bold tracking-tight">RestaurantPro</span>
+          <span className="font-bold">RestaurantPro</span>
         </header>
 
         <main className="flex-1">
@@ -131,3 +168,85 @@ export default function AdminClientWrapper({ children }) {
     </div>
   );
 }
+
+// // app/admin/components/AdminClientWrapper.js → FINAL FIXED & RESPONSIVE
+// "use client";
+
+// import Sidebar from "./Sidebar";
+// import { usePathname, useRouter } from "next/navigation";
+// import { useEffect } from "react";
+
+// export default function AdminClientWrapper({ children, role, userId }) {
+//   const pathname = usePathname();
+//   const router = useRouter();
+  
+//   const isStaff = ["staff", "manager", "waiter", "chef"].includes(role);
+//   const allowedPath = `/admin/role/${userId}`;
+
+//   // CLIENT-SIDE GUARD: Prevents the infinite redirect loop
+//   useEffect(() => {
+//     if (isStaff && pathname !== allowedPath) {
+//       router.replace(allowedPath);
+//     }
+//   }, [pathname, isStaff, userId, router, allowedPath]);
+
+//   // STAFF VIEW: No Sidebar, Black Background
+//   if (isStaff) {
+//     return (
+//       <div className="min-h-screen bg-[#080b10]">
+//         <main className="w-full">
+//           {children}
+//         </main>
+//       </div>
+//     );
+//   }
+
+//   // ADMIN VIEW: Full Sidebar Layout
+//   return (
+//     <div className="flex min-h-screen bg-gray-50">
+//       {/* Mobile Overlay */}
+//       <div 
+//         className="mobile-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden lg:hidden"
+//         onClick={() => {
+//           document.getElementById('mobile-sidebar')?.classList.add('-translate-x-full');
+//           document.querySelector('.mobile-overlay')?.classList.add('hidden');
+//         }}
+//       />
+
+//       {/* Sliding Mobile Sidebar */}
+//       <aside 
+//         id="mobile-sidebar"
+//         className="fixed inset-y-0 left-0 z-[100] w-[280px] transform -translate-x-full lg:hidden transition-transform duration-300 ease-in-out"
+//       >
+//         <Sidebar />
+//       </aside>
+
+//       {/* Desktop Sidebar */}
+//       <aside className="hidden lg:block fixed inset-y-0 left-0 z-40 w-72 h-screen">
+//         <Sidebar />
+//       </aside>
+
+//       {/* Main Content */}
+//       <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
+//         <header className="lg:hidden sticky top-0 z-30 bg-[#0a0e16] text-white px-5 py-4 flex items-center justify-between">
+//           <button
+//             onClick={() => {
+//               document.getElementById('mobile-sidebar')?.classList.remove('-translate-x-full');
+//               document.querySelector('.mobile-overlay')?.classList.remove('hidden');
+//             }}
+//             className="p-2 bg-white/5 rounded-lg transition"
+//           >
+//             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+//             </svg>
+//           </button>
+//           <span className="font-bold">RestaurantPro</span>
+//         </header>
+
+//         <main className="flex-1">
+//           {children}
+//         </main>
+//       </div>
+//     </div>
+//   );
+// }

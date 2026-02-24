@@ -312,7 +312,7 @@ export default function OrdersPage() {
 
         /* ── TOP BAR ── */
         .op-topbar {
-          position: sticky; top: 0; z-index: 50;
+          position: sticky; top: 0; z-index: 10;
           background: rgba(245,244,241,0.88);
           backdrop-filter: blur(18px);
           border-bottom: 1px solid rgba(0,0,0,0.05);

@@ -171,8 +171,6 @@
 //         </div>
 //     );
 // }
-
-
 // app/admin/users/page.js → PREMIUM DARK REDESIGN (matching dashboard style)
 // Inter font | Dark theme | Glows/Hovers | Skeletons | ALL ORIGINAL LOGIC PRESERVED
 
@@ -478,12 +476,6 @@ export default function UsersPage() {
                         }}>
                           {user.role.replace('_', ' ').toUpperCase()}
                         </span>
-
-                        {user.assignedBranches?.length > 0 && (
-                          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
-                            {user.assignedBranches.length} {user.assignedBranches.length === 1 ? 'branch' : 'branches'}
-                          </span>
-                        )}
                       </div>
                     </div>
 

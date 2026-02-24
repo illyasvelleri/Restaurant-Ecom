@@ -410,7 +410,7 @@ export default function AIRecommendationsDashboard() {
           border: 1.5px solid #eceae5;
           border-radius: 16px;
           font-family: 'Courier New', monospace;
-          font-size: 13px;
+          font-size: 15px;
           line-height: 1.7;
           color: #1a1a1a;
           background: #fafaf9;

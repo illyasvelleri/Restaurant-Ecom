@@ -93,7 +93,12 @@
 // FIXED: Mobile menu items now fully visible & scrollable
 "use client";
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, ShoppingBag, Package, TrendingUp, Sandwich, Users, Settings, X, ChevronRight } from 'lucide-react';
+import { 
+  Home, ShoppingBag, Package, TrendingUp, Sandwich, Users, Settings, X, ChevronRight, 
+  Sparkles, LogOut // ← Added Sparkles for AI + LogOut
+} from 'lucide-react';
+import { signOut } from "next-auth/react"; // ← For logout
+import toast from "react-hot-toast"; // ← For feedback
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -108,6 +113,7 @@ export default function Sidebar() {
     { id: 'popular', icon: TrendingUp, label: 'Popular', path: '/admin/popular' },
     { id: 'combos', icon: Sandwich, label: 'Combos', path: '/admin/combos' },
     { id: 'pricing-rules', icon: TrendingUp, label: 'Pricing Rules', path: '/admin/pricing-rules' },
+    { id: 'advanced-ai-dashboard', icon: Sparkles, label: 'AI Dashboard', path: '/admin/advanced-ai-dashboard' }, // ← Best AI icon: Sparkles
     { id: 'analytics', icon: TrendingUp, label: 'Analytics', path: '/admin/analytics' },
     { id: 'settings', icon: Settings, label: 'Settings', path: '/admin/settings' },
   ];
@@ -122,6 +128,17 @@ export default function Sidebar() {
     closeSidebar();
   };
 
+  const handleLogout = () => {
+    if (confirm("Are you sure you want to logout?")) {
+      signOut({ callbackUrl: "/" });
+      toast.success("Logged out successfully", {
+        icon: '👋',
+        duration: 3000,
+      });
+      closeSidebar();
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-[#0a0e16] to-[#080b10] border-r border-white/10">
       {/* Header */}
@@ -133,7 +150,7 @@ export default function Sidebar() {
             <p className="text-[10px] text-white/40 tracking-[0.2em] uppercase">Admin</p>
           </div>
         </div>
-        <button onClick={closeSidebar} className="lg:hidden p-2 text-white/50 hover:text-white"><X size={20}/></button>
+        <button onClick={closeSidebar} className="lg:hidden p-2 text-white/50 hover:text-white"><X size={20} /></button>
       </div>
 
       {/* Navigation */}
@@ -157,6 +174,17 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      {/* LOGOUT - Perfectly placed at bottom */}
+      <div className="p-4 border-t border-white/5 bg-black/20">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 transition-all font-bold text-sm uppercase tracking-wider shadow-sm hover:shadow-md"
+        >
+          <LogOut size={18} />
+          Logout
+        </button>
+      </div>
     </div>
   );
 }

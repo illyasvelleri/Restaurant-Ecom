@@ -476,8 +476,7 @@ export default function CustomersPage() {
             </div>
           )}
         </div>
-
-        <AdminFooter />
+ 
 
         {/* ── CUSTOMER MODAL ── */}
         {selectedCustomer && (

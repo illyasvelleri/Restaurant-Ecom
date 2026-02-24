@@ -251,7 +251,6 @@
 //         </div>
 //     );
 // }
-
 // app/admin/users/[id]/edit/page.js → PREMIUM DARK REDESIGN (matching admin suite)
 // Inter font | Dark glass theme | Glows/Hovers | ALL ORIGINAL LOGIC PRESERVED
 
@@ -272,7 +271,6 @@ export default function EditUserPage() {
     whatsapp: '',
     email: '',
     role: '',
-    assignedBranches: '',
     isActive: true,
   });
 
@@ -296,7 +294,6 @@ export default function EditUserPage() {
         whatsapp: data.whatsapp || '',
         email: data.email || '',
         role: data.role || 'staff',
-        assignedBranches: data.assignedBranches?.join(', ') || '',
         isActive: data.isActive ?? true,
       });
     } catch (err) {
@@ -328,9 +325,6 @@ export default function EditUserPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          assignedBranches: formData.assignedBranches
-            ? formData.assignedBranches.split(',').map(id => id.trim())
-            : [],
         }),
       });
 
@@ -607,19 +601,6 @@ export default function EditUserPage() {
                   </select>
                   <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/50" />
                 </div>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="label-text">
-                  Assigned Branches (comma-separated IDs)
-                </label>
-                <input
-                  name="assignedBranches"
-                  value={formData.assignedBranches}
-                  onChange={handleChange}
-                  className="input-field w-full"
-                  placeholder="699351a385a5f25af130dc7b, another-id-here"
-                />
               </div>
 
               <div className="flex items-center gap-3">

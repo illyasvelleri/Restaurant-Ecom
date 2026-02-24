@@ -197,15 +197,24 @@
 // components/Navbar.jsx → THE 2026 PREMIUM EDIT
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, UtensilsCrossed, Flame, Package, ShoppingBag } from "lucide-react";
+import { Home, UtensilsCrossed, Flame, Package, Shield } from "lucide-react"; // Added Shield
 import ProfileIcon from "./ProfileIcon";
 import { motion } from "framer-motion";
 
 export default function Navbar() {
+
+  const { data: session } = useSession();
+
+  // THE PRO LOGIC: 
+  // An Admin is 'authenticated' globally, but 'signed out' for the User Menu UI.
+  const isCustomer = session?.user?.role === "user";
+  const isAdmin = session?.user?.role && session?.user?.role !== "user";
+
   const pathname = usePathname();
   const [restaurant, setRestaurant] = useState({ name: "...", logo: null });
   const [isScrolled, setIsScrolled] = useState(false);
@@ -213,7 +222,7 @@ export default function Navbar() {
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
-    
+
     fetch("/api/restaurantDetails")
       .then(res => res.json())
       .then(data => setRestaurant({
@@ -235,11 +244,10 @@ export default function Navbar() {
   return (
     <>
       {/* DESKTOP: MINIMALIST LUXURY */}
-      <nav className={`hidden lg:flex fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
-        isScrolled ? "py-4 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm" : "py-8 bg-transparent"
-      }`}>
+      <nav className={`hidden lg:flex fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${isScrolled ? "py-4 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm" : "py-8 bg-transparent"
+        }`}>
         <div className="max-w-screen-2xl mx-auto px-12 flex items-center justify-between w-full">
-          
+
           {/* BRANDING */}
           <Link href="/" className="flex items-center gap-4 group">
             <div className="relative w-12 h-12 overflow-hidden rounded-[1.2rem] bg-black shadow-2xl transition-transform duration-500 group-hover:scale-105">
@@ -262,9 +270,8 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-6 py-2 rounded-full text-[13px] font-bold tracking-[0.1em] uppercase transition-all duration-300 ${
-                  pathname === link.href ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-black"
-                }`}
+                className={`px-6 py-2 rounded-full text-[13px] font-bold tracking-[0.1em] uppercase transition-all duration-300 ${pathname === link.href ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-black"
+                  }`}
               >
                 {link.label}
               </Link>
@@ -273,12 +280,21 @@ export default function Navbar() {
 
           {/* ACTION AREA */}
           <div className="flex items-center gap-8">
+            {/* ADMIN SHORTCUT: Only visible to logged-in Admins on User Route */}
+            {isAdmin && (
+              <Link href="/admin/dashboard" className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full text-[10px] font-black tracking-widest uppercase hover:bg-red-100 transition-all">
+                <Shield size={12} /> Exit Guest View
+              </Link>
+            )}
+
             <Link href="/user/menu" className="relative group">
-               <span className="text-[11px] font-bold tracking-widest uppercase text-black group-hover:text-gray-500 transition-colors">Reserved Table</span>
-               <div className="absolute -bottom-1 left-0 w-0 h-[1px] bg-black transition-all group-hover:w-full"></div>
+              <span className="text-[11px] font-bold tracking-widest uppercase text-black group-hover:text-gray-500 transition-colors">Reserved Table</span>
+              <div className="absolute -bottom-1 left-0 w-0 h-[1px] bg-black transition-all group-hover:w-full"></div>
             </Link>
             <div className="h-6 w-[1px] bg-gray-200"></div>
-            <ProfileIcon />
+            
+            {/* FIX: If not a customer role, we pass 'null' to ProfileIcon so it shows 'Sign In' */}
+            <ProfileIcon session={isCustomer ? session : null} />
           </div>
         </div>
       </nav>
@@ -287,7 +303,14 @@ export default function Navbar() {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100/50 px-6 py-4">
         <div className="flex items-center justify-between">
           <span className="text-lg font-light tracking-tighter uppercase">{restaurant.name}</span>
-          <ProfileIcon />
+          <div className="flex items-center gap-4">
+            {isAdmin && (
+               <Link href="/admin/dashboard" className="p-2 bg-black text-white rounded-lg">
+                  <Shield size={16} />
+               </Link>
+            )}
+            <ProfileIcon session={isCustomer ? session : null} />
+          </div>
         </div>
       </div>
 
@@ -304,7 +327,7 @@ export default function Navbar() {
                 className="relative flex flex-col items-center flex-1 py-2"
               >
                 {active && (
-                  <motion.div 
+                  <motion.div
                     layoutId="activeTab"
                     className="absolute inset-0 bg-white/10 rounded-2xl mx-1"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
@@ -322,3 +345,133 @@ export default function Navbar() {
     </>
   );
 }
+
+// // components/Navbar.jsx → THE 2026 PREMIUM EDIT
+// "use client";
+
+
+// import { useState, useEffect } from "react";
+// import Image from "next/image";
+// import Link from "next/link";
+// import { usePathname } from "next/navigation";
+// import { Home, UtensilsCrossed, Flame, Package, ShoppingBag } from "lucide-react";
+// import ProfileIcon from "./ProfileIcon";
+// import { motion } from "framer-motion";
+
+// export default function Navbar() {
+//   const pathname = usePathname();
+//   const [restaurant, setRestaurant] = useState({ name: "...", logo: null });
+//   const [isScrolled, setIsScrolled] = useState(false);
+
+//   useEffect(() => {
+//     const handleScroll = () => setIsScrolled(window.scrollY > 20);
+//     window.addEventListener("scroll", handleScroll);
+    
+//     fetch("/api/restaurantDetails")
+//       .then(res => res.json())
+//       .then(data => setRestaurant({
+//         name: data.restaurant?.name || "Restaurant",
+//         logo: data.restaurant?.logo || null
+//       }))
+//       .catch(() => setRestaurant({ name: "Luxe Eats", logo: null }));
+
+//     return () => window.removeEventListener("scroll", handleScroll);
+//   }, []);
+
+//   const navLinks = [
+//     { href: "/", label: "Home", icon: Home },
+//     { href: "/user/menu", label: "Menu", icon: UtensilsCrossed },
+//     { href: "/user/popular", label: "Curated", icon: Flame },
+//     { href: "/user/combos", label: "Offers", icon: Package },
+//   ];
+
+//   return (
+//     <>
+//       {/* DESKTOP: MINIMALIST LUXURY */}
+//       <nav className={`hidden lg:flex fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
+//         isScrolled ? "py-4 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm" : "py-8 bg-transparent"
+//       }`}>
+//         <div className="max-w-screen-2xl mx-auto px-12 flex items-center justify-between w-full">
+          
+//           {/* BRANDING */}
+//           <Link href="/" className="flex items-center gap-4 group">
+//             <div className="relative w-12 h-12 overflow-hidden rounded-[1.2rem] bg-black shadow-2xl transition-transform duration-500 group-hover:scale-105">
+//               {restaurant.logo ? (
+//                 <Image src={restaurant.logo} alt="Logo" fill className="object-cover" />
+//               ) : (
+//                 <div className="flex items-center justify-center h-full text-white font-serif italic text-xl">
+//                   {restaurant.name.charAt(0)}
+//                 </div>
+//               )}
+//             </div>
+//             <span className="text-2xl font-light tracking-[-0.03em] text-black">
+//               {restaurant.name.split(' ')[0]}<span className="font-serif italic text-gray-400">{restaurant.name.split(' ')[1] || ""}</span>
+//             </span>
+//           </Link>
+
+//           {/* NAVIGATION - FLOATING PILL STYLE */}
+//           <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-gray-50/50 border border-gray-100/50 p-1.5 rounded-full backdrop-blur-md">
+//             {navLinks.map((link) => (
+//               <Link
+//                 key={link.href}
+//                 href={link.href}
+//                 className={`px-6 py-2 rounded-full text-[13px] font-bold tracking-[0.1em] uppercase transition-all duration-300 ${
+//                   pathname === link.href ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-black"
+//                 }`}
+//               >
+//                 {link.label}
+//               </Link>
+//             ))}
+//           </div>
+
+//           {/* ACTION AREA */}
+//           <div className="flex items-center gap-8">
+//             <Link href="/user/menu" className="relative group">
+//                <span className="text-[11px] font-bold tracking-widest uppercase text-black group-hover:text-gray-500 transition-colors">Reserved Table</span>
+//                <div className="absolute -bottom-1 left-0 w-0 h-[1px] bg-black transition-all group-hover:w-full"></div>
+//             </Link>
+//             <div className="h-6 w-[1px] bg-gray-200"></div>
+//             <ProfileIcon />
+//           </div>
+//         </div>
+//       </nav>
+
+//       {/* MOBILE TOP: CLEAN GLASS */}
+//       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100/50 px-6 py-4">
+//         <div className="flex items-center justify-between">
+//           <span className="text-lg font-light tracking-tighter uppercase">{restaurant.name}</span>
+//           <ProfileIcon />
+//         </div>
+//       </div>
+
+//       {/* MOBILE BOTTOM: LIQUID TAB BAR */}
+//       <div className="lg:hidden fixed bottom-6 left-6 right-6 z-[100]">
+//         <div className="bg-black/90 backdrop-blur-2xl rounded-[2.5rem] p-2 flex justify-between items-center shadow-2xl border border-white/10">
+//           {navLinks.map((item) => {
+//             const Icon = item.icon;
+//             const active = pathname === item.href;
+//             return (
+//               <Link
+//                 key={item.href}
+//                 href={item.href}
+//                 className="relative flex flex-col items-center flex-1 py-2"
+//               >
+//                 {active && (
+//                   <motion.div 
+//                     layoutId="activeTab"
+//                     className="absolute inset-0 bg-white/10 rounded-2xl mx-1"
+//                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+//                   />
+//                 )}
+//                 <Icon size={20} className={`transition-colors duration-300 ${active ? "text-white" : "text-gray-500"}`} />
+//                 <span className={`text-[9px] mt-1 font-bold uppercase tracking-widest ${active ? "text-white" : "text-gray-500"}`}>
+//                   {item.label}
+//                 </span>
+//               </Link>
+//             );
+//           })}
+//         </div>
+//       </div>
+//     </>
+//   );
+// }

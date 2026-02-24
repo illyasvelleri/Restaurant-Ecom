@@ -1317,7 +1317,6 @@ export default function AnalyticsPage() {
                     </div>
                 )}
 
-                <AdminFooter />
             </div>
         </>
     );

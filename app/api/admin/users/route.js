@@ -15,7 +15,7 @@ export async function GET() {
         const users = await User.find({
             role: { $ne: 'user' }  // ← key: exclude normal customers
         })
-            .select('username name email whatsapp role assignedBranches isActive createdAt')
+            .select('username name email whatsapp role isActive createdAt')
             .sort({ createdAt: -1 })
             .lean();
 
@@ -42,7 +42,6 @@ export async function POST(req) {
             whatsapp,
             email,
             role,
-            assignedBranches = [],
         } = body;
 
         // Required fields
@@ -89,7 +88,6 @@ export async function POST(req) {
             whatsapp: cleanWhatsapp,
             email: email?.trim().toLowerCase() || null,
             role,
-            assignedBranches: Array.isArray(assignedBranches) ? assignedBranches : [],
             isActive: true,
         };
 
@@ -107,7 +105,6 @@ export async function POST(req) {
                     whatsapp: user.whatsapp,
                     email: user.email,
                     role: user.role,
-                    assignedBranches: user.assignedBranches,
                 },
             },
             { status: 201 }
