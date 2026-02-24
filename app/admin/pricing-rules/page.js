@@ -455,7 +455,7 @@
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { PlusCircle, Edit, Trash2, Loader2, X, RefreshCw } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Loader2, X, RefreshCw , Package} from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────
 // PULSE DOT (same as dashboard)
